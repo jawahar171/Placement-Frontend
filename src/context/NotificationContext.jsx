@@ -27,7 +27,7 @@ export function NotificationProvider({ children }) {
 
   useEffect(() => {
     if (!user) return
-    const s = io(import.meta.env.VITE_SOCKET_URL || 'https://placement-backend-wd6x.onrender.com/api', {
+    const s = io(import.meta.env.VITE_SOCKET_URL || '', {
       auth: { token: localStorage.getItem('token') }
     })
     s.emit('join', user._id)
