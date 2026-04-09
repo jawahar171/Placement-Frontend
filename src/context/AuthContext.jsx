@@ -10,8 +10,10 @@ export function AuthProvider({ children }) {
   const fetchMe = useCallback(async () => {
     try {
       const { data } = await api.get('/auth/me')
-      setUser(data)
+      setUser(data.user || data)
     } catch {
+      // Token invalid or expired — clear it silently, do NOT redirect here.
+      // The router in App.jsx handles redirect to /login via PrivateRoute.
       localStorage.removeItem('token')
       setUser(null)
     } finally {
