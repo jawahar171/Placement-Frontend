@@ -12,7 +12,7 @@ if (!BASE_URL) {
 }
 
 const instance = axios.create({
-  baseURL: BASE_URL || 'http://localhost:5000/api',
+  baseURL: BASE_URL || 'https://placement-backend-wd6x.onrender.com',
   timeout: 15000,
 });
 
