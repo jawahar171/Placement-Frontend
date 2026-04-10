@@ -12,7 +12,7 @@ export default function CompanyProfile() {
   const [saving, setSaving]   = useState(false)
   const cp = user?.companyProfile
 
-  const { register, handleSubmit, reset } = useForm()
+  const { register, handleSubmit, reset, formState: { errors } } = useForm()
 
   useEffect(() => {
     if (user) {
@@ -65,23 +65,32 @@ export default function CompanyProfile() {
           <h3 className="section-title">Company Information</h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="label">Company Name</label>
-              <input {...register('companyName')} className="input" />
+              <label className="label">Company Name <span className="text-red-400">*</span></label>
+              <input {...register('companyName', { required: 'Company name is required' })} className="input" />
+              {errors.companyName && <p className="text-red-500 text-xs mt-1">{errors.companyName.message}</p>}
             </div>
             <div>
-              <label className="label">Industry</label>
-              <select {...register('industry')} className="input">
+              <label className="label">Industry <span className="text-red-400">*</span></label>
+              <select {...register('industry', { required: 'Industry is required' })} className="input">
                 <option value="">Select industry</option>
                 {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
               </select>
+              {errors.industry && <p className="text-red-500 text-xs mt-1">{errors.industry.message}</p>}
             </div>
             <div>
               <label className="label">Website</label>
-              <input {...register('website')} placeholder="https://yourcompany.com" className="input" />
+              <input {...register('website', {
+                pattern: { value: /^(https?:\/\/).+/, message: 'URL must start with https://' }
+              })} placeholder="https://yourcompany.com" className="input" />
+              {errors.website && <p className="text-red-500 text-xs mt-1">{errors.website.message}</p>}
             </div>
             <div>
               <label className="label">Founded Year</label>
-              <input {...register('foundedYear')} type="number" placeholder="2010" className="input" />
+              <input {...register('foundedYear', {
+                min: { value: 1800, message: 'Enter a valid year' },
+                max: { value: new Date().getFullYear(), message: 'Cannot be in the future' }
+              })} type="number" placeholder="2010" className="input" />
+              {errors.foundedYear && <p className="text-red-500 text-xs mt-1">{errors.foundedYear.message}</p>}
             </div>
             <div>
               <label className="label">Employee Count</label>
@@ -96,7 +105,10 @@ export default function CompanyProfile() {
             </div>
             <div className="col-span-2">
               <label className="label">HR Phone</label>
-              <input {...register('hrPhone')} placeholder="+91 XXXXX XXXXX" className="input" />
+              <input {...register('hrPhone', {
+                pattern: { value: /^[+\d\s\-()]{7,15}$/, message: 'Enter a valid phone number' }
+              })} placeholder="+91 XXXXX XXXXX" className="input" />
+              {errors.hrPhone && <p className="text-red-500 text-xs mt-1">{errors.hrPhone.message}</p>}
             </div>
           </div>
           <div>
@@ -115,11 +127,17 @@ export default function CompanyProfile() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="label">LinkedIn</label>
-              <input {...register('linkedin')} placeholder="linkedin.com/company/yourco" className="input" />
+              <input {...register('linkedin', {
+                pattern: { value: /^(https?:\/\/)?(www\.)?linkedin\.com\/.+/, message: 'Enter a valid LinkedIn URL' }
+              })} placeholder="linkedin.com/company/yourco" className="input" />
+              {errors.linkedin && <p className="text-red-500 text-xs mt-1">{errors.linkedin.message}</p>}
             </div>
             <div>
               <label className="label">Twitter / X</label>
-              <input {...register('twitter')} placeholder="twitter.com/yourco" className="input" />
+              <input {...register('twitter', {
+                pattern: { value: /^(https?:\/\/)?(www\.)?(twitter|x)\.com\/.+/, message: 'Enter a valid Twitter/X URL' }
+              })} placeholder="twitter.com/yourco" className="input" />
+              {errors.twitter && <p className="text-red-500 text-xs mt-1">{errors.twitter.message}</p>}
             </div>
           </div>
         </div>

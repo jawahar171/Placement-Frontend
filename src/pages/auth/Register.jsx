@@ -93,17 +93,18 @@ export default function Register() {
               <div className="space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="label text-gray-300 text-sm">Roll Number</label>
+                    <label className="label text-gray-300 text-sm">Roll Number <span className="text-red-400">*</span></label>
                     <input
-                      {...register('rollNumber')}
+                      {...register('rollNumber', { required: 'Roll number is required' })}
                       placeholder="21CS001"
                       className="input bg-white/10 border-white/20 text-white placeholder-gray-500 w-full text-sm"
                     />
+                    {errors.rollNumber && <p className="text-red-400 text-xs mt-1">{errors.rollNumber.message}</p>}
                   </div>
                   <div>
-                    <label className="label text-gray-300 text-sm">Department</label>
+                    <label className="label text-gray-300 text-sm">Department <span className="text-red-400">*</span></label>
                     <select
-                      {...register('department')}
+                      {...register('department', { required: 'Department is required' })}
                       className="input bg-white/10 border-white/20 text-white w-full text-sm"
                     >
                       <option value="" className="bg-ink-800">Select dept</option>
@@ -111,15 +112,20 @@ export default function Register() {
                         <option key={d} value={d} className="bg-ink-800">{d}</option>
                       ))}
                     </select>
+                    {errors.department && <p className="text-red-400 text-xs mt-1">{errors.department.message}</p>}
                   </div>
                 </div>
                 <div>
-                  <label className="label text-gray-300 text-sm">Batch</label>
+                  <label className="label text-gray-300 text-sm">Batch <span className="text-red-400">*</span></label>
                   <input
-                    {...register('batch')}
+                    {...register('batch', {
+                      required: 'Batch is required',
+                      pattern: { value: /^\d{4}-\d{4}$/, message: 'Format: YYYY-YYYY (e.g. 2021-2025)' }
+                    })}
                     placeholder="2021-2025"
                     className="input bg-white/10 border-white/20 text-white placeholder-gray-500 w-full text-sm"
                   />
+                  {errors.batch && <p className="text-red-400 text-xs mt-1">{errors.batch.message}</p>}
                 </div>
               </div>
             )}
@@ -128,17 +134,18 @@ export default function Register() {
             {role === 'company' && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="label text-gray-300 text-sm">Company Name</label>
+                  <label className="label text-gray-300 text-sm">Company Name <span className="text-red-400">*</span></label>
                   <input
-                    {...register('companyName')}
+                    {...register('companyName', { required: 'Company name is required' })}
                     placeholder="Acme Corp"
                     className="input bg-white/10 border-white/20 text-white placeholder-gray-500 w-full text-sm"
                   />
+                  {errors.companyName && <p className="text-red-400 text-xs mt-1">{errors.companyName.message}</p>}
                 </div>
                 <div>
-                  <label className="label text-gray-300 text-sm">Industry</label>
+                  <label className="label text-gray-300 text-sm">Industry <span className="text-red-400">*</span></label>
                   <select
-                    {...register('industry')}
+                    {...register('industry', { required: 'Industry is required' })}
                     className="input bg-white/10 border-white/20 text-white w-full text-sm"
                   >
                     <option value="" className="bg-ink-800">Select</option>
@@ -146,6 +153,7 @@ export default function Register() {
                       <option key={i} value={i} className="bg-ink-800">{i}</option>
                     ))}
                   </select>
+                  {errors.industry && <p className="text-red-400 text-xs mt-1">{errors.industry.message}</p>}
                 </div>
               </div>
             )}

@@ -8,14 +8,17 @@ export default function AdminCompanies() {
   const [companies, setCompanies] = useState([])
   const [loading, setLoading]     = useState(true)
   const [search, setSearch]       = useState('')
+  const [activeFilter, setActiveFilter] = useState('')
   const [detail, setDetail]       = useState(null)
 
   const fetchCompanies = () => {
-    const params = search ? `?search=${search}` : ''
-    api.get(`/companies${params}`).then(r => { setCompanies(r.data.companies); setLoading(false) })
+    const params = new URLSearchParams()
+    if (search)       params.append('search', search)
+    if (activeFilter) params.append('status', activeFilter)
+    api.get(`/companies?${params}`).then(r => { setCompanies(r.data.companies); setLoading(false) })
   }
 
-  useEffect(() => { fetchCompanies() }, [search])
+  useEffect(() => { fetchCompanies() }, [search, activeFilter])
 
   const toggleStatus = async (id) => {
     try {
@@ -34,7 +37,14 @@ export default function AdminCompanies() {
           <h1 className="page-title">Companies</h1>
           <p className="text-gray-500 text-sm mt-1">{companies.length} partner companies</p>
         </div>
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search companies..." className="input w-52" />
+        <div className="flex gap-2">
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search companies..." className="input w-52" />
+          <select value={activeFilter} onChange={e => setActiveFilter(e.target.value)} className="input w-36">
+            <option value="">All accounts</option>
+            <option value="active">Active</option>
+            <option value="inactive">Deactivated</option>
+          </select>
+        </div>
       </div>
 
       {companies.length === 0 ? (

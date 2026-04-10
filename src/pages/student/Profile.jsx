@@ -12,7 +12,7 @@ export function StudentProfile() {
   const [saving, setSaving] = useState(false)
   const sp = user?.studentProfile
 
-  const { register, handleSubmit, reset } = useForm({
+  const { register, handleSubmit, reset, formState: { errors } } = useForm({
     defaultValues: {
       name: user?.name,
       phone: sp?.phone,
@@ -110,36 +110,61 @@ export function StudentProfile() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="label">Full Name</label>
-            <input {...register('name')} className="input" />
+            <label className="label">Full Name <span className="text-red-400">*</span></label>
+            <input {...register('name', { required: 'Name is required' })} className="input" />
+            {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
           </div>
           <div>
             <label className="label">Phone</label>
-            <input {...register('phone')} placeholder="+91 XXXXX XXXXX" className="input" />
+            <input {...register('phone', {
+              pattern: { value: /^[+\d\s\-()]{7,15}$/, message: 'Enter a valid phone number' }
+            })} placeholder="+91 XXXXX XXXXX" className="input" />
+            {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>}
           </div>
           <div>
             <label className="label">CGPA</label>
-            <input {...register('cgpa')} type="number" step="0.01" min="0" max="10" placeholder="8.5" className="input" />
+            <input {...register('cgpa', {
+              min: { value: 0, message: 'Min 0' },
+              max: { value: 10, message: 'Max 10' }
+            })} type="number" step="0.01" min="0" max="10" placeholder="8.5" className="input" />
+            {errors.cgpa && <p className="text-red-500 text-xs mt-1">{errors.cgpa.message}</p>}
           </div>
           <div>
             <label className="label">10th %</label>
-            <input {...register('tenthPercentage')} type="number" step="0.1" placeholder="90.5" className="input" />
+            <input {...register('tenthPercentage', {
+              min: { value: 0, message: 'Min 0' },
+              max: { value: 100, message: 'Max 100' }
+            })} type="number" step="0.1" placeholder="90.5" className="input" />
+            {errors.tenthPercentage && <p className="text-red-500 text-xs mt-1">{errors.tenthPercentage.message}</p>}
           </div>
           <div>
             <label className="label">12th %</label>
-            <input {...register('twelfthPercentage')} type="number" step="0.1" placeholder="88.0" className="input" />
+            <input {...register('twelfthPercentage', {
+              min: { value: 0, message: 'Min 0' },
+              max: { value: 100, message: 'Max 100' }
+            })} type="number" step="0.1" placeholder="88.0" className="input" />
+            {errors.twelfthPercentage && <p className="text-red-500 text-xs mt-1">{errors.twelfthPercentage.message}</p>}
           </div>
           <div>
             <label className="label">LinkedIn</label>
-            <input {...register('linkedIn')} placeholder="linkedin.com/in/yourname" className="input" />
+            <input {...register('linkedIn', {
+              pattern: { value: /^(https?:\/\/)?(www\.)?linkedin\.com\/.+/, message: 'Enter a valid LinkedIn URL' }
+            })} placeholder="linkedin.com/in/yourname" className="input" />
+            {errors.linkedIn && <p className="text-red-500 text-xs mt-1">{errors.linkedIn.message}</p>}
           </div>
           <div>
             <label className="label">GitHub</label>
-            <input {...register('github')} placeholder="github.com/yourname" className="input" />
+            <input {...register('github', {
+              pattern: { value: /^(https?:\/\/)?(www\.)?github\.com\/.+/, message: 'Enter a valid GitHub URL' }
+            })} placeholder="github.com/yourname" className="input" />
+            {errors.github && <p className="text-red-500 text-xs mt-1">{errors.github.message}</p>}
           </div>
           <div>
             <label className="label">Portfolio</label>
-            <input {...register('portfolio')} placeholder="yourwebsite.com" className="input" />
+            <input {...register('portfolio', {
+              pattern: { value: /^(https?:\/\/).+/, message: 'URL must start with http:// or https://' }
+            })} placeholder="https://yourwebsite.com" className="input" />
+            {errors.portfolio && <p className="text-red-500 text-xs mt-1">{errors.portfolio.message}</p>}
           </div>
         </div>
 

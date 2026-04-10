@@ -12,6 +12,7 @@ export default function AdminStudents() {
   const [search, setSearch]     = useState('')
   const [dept, setDept]         = useState('')
   const [statusFilter, setStatus] = useState('')
+  const [activeFilter, setActiveFilter] = useState('')  // '' | 'active' | 'inactive'
   const [page, setPage]         = useState(1)
   const [total, setTotal]       = useState(0)
   const [selected, setSelected] = useState([])
@@ -25,6 +26,7 @@ export default function AdminStudents() {
       if (search)       params.append('search', search)
       if (dept)         params.append('department', dept)
       if (statusFilter) params.append('status', statusFilter)
+      if (activeFilter) params.append('status', activeFilter)
       const { data } = await api.get(`/students?${params}`)
       setStudents(data.students)
       setTotal(data.total)
@@ -32,7 +34,7 @@ export default function AdminStudents() {
     finally { setLoading(false) }
   }
 
-  useEffect(() => { fetchStudents() }, [search, dept, statusFilter, page])
+  useEffect(() => { fetchStudents() }, [search, dept, statusFilter, activeFilter, page])
 
   const handleToggleStatus = async (id) => {
     try {
@@ -86,6 +88,11 @@ export default function AdminStudents() {
             <option value="not_placed">Not Placed</option>
             <option value="placed">Placed</option>
             <option value="opted_out">Opted Out</option>
+          </select>
+          <select value={activeFilter} onChange={e => { setActiveFilter(e.target.value); setPage(1) }} className="input w-36">
+            <option value="">All accounts</option>
+            <option value="active">Active</option>
+            <option value="inactive">Deactivated</option>
           </select>
         </div>
       </div>
