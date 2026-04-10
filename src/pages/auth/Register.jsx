@@ -109,13 +109,13 @@ export default function Register() {
 
             <div>
               <label className="label text-gray-300">Password</label>
-              <input {...register('password', { required: true, minLength: { value: 6, message: 'Min 6 characters' } })} type="password" placeholder="••••••••" className="input bg-white/10 border-white/20 text-white placeholder-gray-500" />
+              <input {...register('password', { required: true, minLength: { value: 6, message: 'Min 6 characters' } })} type="password" autoComplete="new-password" placeholder="••••••••" className="input bg-white/10 border-white/20 text-white placeholder-gray-500" />
               {errors.password && <p className="text-red-400 text-xs mt-1">{errors.password.message}</p>}
             </div>
 
             <div>
               <label className="label text-gray-300">Confirm Password</label>
-              <input {...register('confirmPassword', { validate: v => v === password || 'Passwords do not match' })} type="password" placeholder="••••••••" className="input bg-white/10 border-white/20 text-white placeholder-gray-500" />
+              <input {...register('confirmPassword', { validate: v => v === password || 'Passwords do not match' })} type="password" autoComplete="new-password" placeholder="••••••••" className="input bg-white/10 border-white/20 text-white placeholder-gray-500" />
               {errors.confirmPassword && <p className="text-red-400 text-xs mt-1">{errors.confirmPassword.message}</p>}
             </div>
 

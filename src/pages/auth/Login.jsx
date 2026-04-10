@@ -50,6 +50,7 @@ export default function Login() {
               <input
                 {...register('email', { required: 'Email is required' })}
                 type="email"
+                autoComplete="email"
                 placeholder="you@college.edu"
                 className="input bg-white/10 border-white/20 text-white placeholder-gray-500 focus:ring-gold-400"
               />
@@ -61,6 +62,7 @@ export default function Login() {
               <input
                 {...register('password', { required: 'Password is required' })}
                 type="password"
+                autoComplete="current-password"
                 placeholder="••••••••"
                 className="input bg-white/10 border-white/20 text-white placeholder-gray-500 focus:ring-gold-400"
               />
