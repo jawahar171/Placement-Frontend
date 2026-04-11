@@ -166,15 +166,15 @@ export default function AdminStudents() {
                       <td className="table-td">
                         {s.offeredCompany ? (
                           <div>
-                            <p className="text-sm text-gray-700 font-medium">{sp.offeredCompany}</p>
-                            {s.ctc && <p className="text-xs text-green-600">₹{sp.offeredPackage} LPA</p>}
+                            <p className="text-sm text-gray-700 font-medium">{s.offeredCompany}</p>
+                            {s.ctc && <p className="text-xs text-green-600">₹{s.ctc} LPA</p>}
                           </div>
                         ) : '—'}
                       </td>
                       <td className="table-td">
                         <div className="flex gap-1">
                           <button onClick={() => setDetailStudent(s)} className="btn-ghost text-xs py-1 px-2">View</button>
-                          <button onClick={() => setPlacementEdit({ id: s._id, name: s.name, data: { placementStatus: s.placementStatus, offeredCompany: s.offeredCompany, offeredRole: sp?.offeredRole, offeredPackage: s.ctc } })}
+                          <button onClick={() => setPlacementEdit({ id: s._id, name: s.name, data: { placementStatus: s.placementStatus, offeredCompany: s.offeredCompany, offeredRole: s.offeredRole, offeredPackage: s.ctc } })}
                             className="btn-ghost text-xs py-1 px-2 text-blue-500">Edit</button>
                           <button onClick={() => handleToggleStatus(s._id)}
                             className={`text-xs py-1 px-2 rounded-lg font-medium ${s.isActive ? 'text-red-500 hover:bg-red-50' : 'text-green-600 hover:bg-green-50'}`}>

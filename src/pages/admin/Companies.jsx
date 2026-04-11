@@ -58,7 +58,7 @@ export default function AdminCompanies() {
                 <div className="flex items-start gap-3 mb-4">
                   <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
                     {c.logoUrl
-                      ? <img src={cp.logoUrl} alt="" className="w-full h-full object-cover" />
+                      ? <img src={c.logoUrl} alt="" className="w-full h-full object-cover" />
                       : <BuildingOffice2Icon className="w-6 h-6 text-gray-400" />}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -69,10 +69,10 @@ export default function AdminCompanies() {
                 </div>
                 <div className="space-y-1 text-sm text-gray-500 mb-4">
                   <p>✉ {c.email}</p>
-                  {c.hrName   && <p>👤 {cp.hrName}</p>}
-                  {c.hrPhone  && <p>📞 {cp.hrPhone}</p>}
-                  {c.website  && <a href={cp.website} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline block truncate">🌐 {cp.website}</a>}
-                  {c.employeeCount && <p>👥 {cp.employeeCount} employees</p>}
+                  {c.hrName   && <p>👤 {c.hrName}</p>}
+                  {c.hrPhone  && <p>📞 {c.hrPhone}</p>}
+                  {c.website  && <a href={c.website} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline block truncate">🌐 {c.website}</a>}
+                  {c.employeeCount && <p>👥 {c.employeeCount} employees</p>}
                 </div>
                 <div className="flex gap-2 pt-3 border-t border-gray-50">
                   <button onClick={() => setDetail(c)} className="btn-ghost text-sm py-1.5 flex-1">View Details</button>
