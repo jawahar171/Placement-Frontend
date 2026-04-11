@@ -73,7 +73,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{iv.student?.name}</p>
-                    <p className="text-xs text-gray-400 truncate">{iv.job?.title} · {iv.company?.companyProfile?.companyName}</p>
+                    <p className="text-xs text-gray-400 truncate">{iv.job?.title} · {iv.company?.companyName || iv.company?.name}</p>
                     <p className="text-xs text-amber-600">{dayjs(iv.scheduledAt).format('h:mm A')} · {iv.roundName}</p>
                   </div>
                   <span className={`badge ${iv.format === 'virtual' ? 'badge-blue' : 'badge-amber'} flex-shrink-0`}>{iv.format}</span>

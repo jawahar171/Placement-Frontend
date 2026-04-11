@@ -10,7 +10,7 @@ const EMPLOYEE_COUNTS = ['1-50','51-200','201-500','501-1000','1001-5000','5000+
 export default function CompanyProfile() {
   const { user, refreshUser } = useAuth()
   const [saving, setSaving]   = useState(false)
-  const cp = user?.companyProfile
+  // Fields are flat on user object
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm()
 
@@ -18,17 +18,17 @@ export default function CompanyProfile() {
     if (user) {
       reset({
         name:          user.name,
-        companyName:   cp?.companyName,
-        industry:      cp?.industry,
-        website:       cp?.website,
-        description:   cp?.description,
-        hrName:        cp?.hrName,
-        hrPhone:       cp?.hrPhone,
-        address:       cp?.address,
-        employeeCount: cp?.employeeCount,
-        foundedYear:   cp?.foundedYear,
-        linkedin:      cp?.socialLinks?.linkedin,
-        twitter:       cp?.socialLinks?.twitter,
+        companyName:   user?.companyName,
+        industry:      user?.industry,
+        website:       user?.website,
+        description:   user?.description,
+        hrName:        user?.hrName,
+        hrPhone:       user?.hrPhone,
+        address:       user?.address,
+        employeeCount: user?.employeeCount,
+        foundedYear:   user?.foundedYear,
+        linkedin:      user?.linkedin,
+        twitter:       user?.twitter,
       })
     }
   }, [user])
@@ -47,7 +47,8 @@ export default function CompanyProfile() {
         address:       data.address,
         employeeCount: data.employeeCount,
         foundedYear:   data.foundedYear,
-        socialLinks: { linkedin: data.linkedin, twitter: data.twitter }
+        linkedin: data.linkedin,
+        twitter:  data.twitter,
       })
       await refreshUser()
       toast.success('Profile updated!')

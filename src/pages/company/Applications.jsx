@@ -120,8 +120,8 @@ export default function CompanyApplications() {
                       <p className="text-xs text-gray-400 capitalize">{app.job?.type}</p>
                     </td>
                     <td className="table-td">
-                      <span className={`font-mono text-sm font-medium ${app.student?.studentProfile?.cgpa >= 8 ? 'text-green-600' : app.student?.studentProfile?.cgpa >= 6 ? 'text-amber-600' : 'text-gray-500'}`}>
-                        {app.student?.studentProfile?.cgpa || '—'}
+                      <span className={`font-mono text-sm font-medium ${app.student?.cgpa >= 8 ? 'text-green-600' : app.student?.cgpa >= 6 ? 'text-amber-600' : 'text-gray-500'}`}>
+                        {app.student?.cgpa || '—'}
                       </span>
                     </td>
                     <td className="table-td text-gray-400 text-xs">{dayjs(app.createdAt).format('DD MMM YYYY')}</td>
@@ -129,8 +129,8 @@ export default function CompanyApplications() {
                     <td className="table-td">
                       <div className="flex items-center gap-1">
                         <button onClick={() => setDetail(app)} className="btn-ghost text-xs py-1 px-2">View</button>
-                        {app.student?.studentProfile?.resumeUrl && (
-                          <a href={app.student.studentProfile.resumeUrl} target="_blank" rel="noreferrer"
+                        {app.student?.resumeUrl && (
+                          <a href={app.student?.resumeUrl} target="_blank" rel="noreferrer"
                             className="btn-ghost text-xs py-1 px-2 text-blue-500">Resume</a>
                         )}
                         {STATUS_ACTIONS[app.status]?.map(action => (
@@ -162,18 +162,18 @@ export default function CompanyApplications() {
                 <h3 className="font-semibold text-gray-900">{detail.student?.name}</h3>
                 <p className="text-sm text-gray-500">{detail.student?.email}</p>
                 <div className="flex gap-3 mt-1 text-xs text-gray-400">
-                  <span>{detail.student?.studentProfile?.department}</span>
-                  <span>CGPA: <strong>{detail.student?.studentProfile?.cgpa}</strong></span>
-                  <span>Batch: {detail.student?.studentProfile?.batch}</span>
+                  <span>{detail.student?.department}</span>
+                  <span>CGPA: <strong>{detail.student?.cgpa}</strong></span>
+                  <span>Batch: {detail.student?.batch}</span>
                 </div>
               </div>
             </div>
 
-            {detail.student?.studentProfile?.skills?.length > 0 && (
+            {detail.student?.skills?.length > 0 && (
               <div>
                 <p className="text-sm font-medium text-gray-700 mb-2">Skills</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {detail.student.studentProfile.skills.map(s => (
+                  {detail.student?.skills.map(s => (
                     <span key={s} className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs">{s}</span>
                   ))}
                 </div>
@@ -204,8 +204,8 @@ export default function CompanyApplications() {
             </div>
 
             <div className="flex gap-2 pt-2 flex-wrap">
-              {detail.student?.studentProfile?.resumeUrl && (
-                <a href={detail.student.studentProfile.resumeUrl} target="_blank" rel="noreferrer" className="btn-secondary text-sm">View Resume</a>
+              {detail.student?.resumeUrl && (
+                <a href={detail.student?.resumeUrl} target="_blank" rel="noreferrer" className="btn-secondary text-sm">View Resume</a>
               )}
               {STATUS_ACTIONS[detail.status]?.map(action => (
                 <button key={action.next}

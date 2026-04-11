@@ -131,7 +131,7 @@ export default function AdminStudents() {
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {students.map(s => {
-                  const sp = s.studentProfile
+                  // fields are flat on s
                   return (
                     <tr key={s._id} className="table-row">
                       <td className="table-td">
@@ -148,33 +148,33 @@ export default function AdminStudents() {
                         </div>
                       </td>
                       <td className="table-td">
-                        <p className="text-sm font-mono text-gray-600">{sp?.rollNumber || '—'}</p>
-                        <p className="text-xs text-gray-400">{sp?.department} · {sp?.batch}</p>
+                        <p className="text-sm font-mono text-gray-600">{s.rollNumber || '—'}</p>
+                        <p className="text-xs text-gray-400">{s.department} · {s.batch}</p>
                       </td>
                       <td className="table-td">
-                        <span className={`font-mono text-sm font-semibold ${sp?.cgpa >= 8 ? 'text-green-600' : sp?.cgpa >= 6 ? 'text-amber-600' : 'text-gray-500'}`}>
-                          {sp?.cgpa || '—'}
+                        <span className={`font-mono text-sm font-semibold ${s.cgpa >= 8 ? 'text-green-600' : s.cgpa >= 6 ? 'text-amber-600' : 'text-gray-500'}`}>
+                          {s.cgpa || '—'}
                         </span>
                       </td>
                       <td className="table-td">
                         <div className="flex flex-wrap gap-1 max-w-[140px]">
-                          {sp?.skills?.slice(0, 2).map(sk => <span key={sk} className="px-1.5 py-0.5 bg-gray-100 rounded text-xs text-gray-600">{sk}</span>)}
-                          {sp?.skills?.length > 2 && <span className="text-xs text-gray-400">+{sp.skills.length - 2}</span>}
+                          {s.skills?.slice(0, 2).map(sk => <span key={sk} className="px-1.5 py-0.5 bg-gray-100 rounded text-xs text-gray-600">{sk}</span>)}
+                          {s.skills?.length > 2 && <span className="text-xs text-gray-400">+{s.skills.length - 2}</span>}
                         </div>
                       </td>
-                      <td className="table-td"><StatusBadge status={sp?.placementStatus || 'not_placed'} /></td>
+                      <td className="table-td"><StatusBadge status={s.placementStatus || 'not_placed'} /></td>
                       <td className="table-td">
-                        {sp?.offeredCompany ? (
+                        {s.offeredCompany ? (
                           <div>
                             <p className="text-sm text-gray-700 font-medium">{sp.offeredCompany}</p>
-                            {sp?.offeredPackage && <p className="text-xs text-green-600">₹{sp.offeredPackage} LPA</p>}
+                            {s.ctc && <p className="text-xs text-green-600">₹{sp.offeredPackage} LPA</p>}
                           </div>
                         ) : '—'}
                       </td>
                       <td className="table-td">
                         <div className="flex gap-1">
                           <button onClick={() => setDetailStudent(s)} className="btn-ghost text-xs py-1 px-2">View</button>
-                          <button onClick={() => setPlacementEdit({ id: s._id, name: s.name, data: { placementStatus: sp?.placementStatus, offeredCompany: sp?.offeredCompany, offeredRole: sp?.offeredRole, offeredPackage: sp?.offeredPackage } })}
+                          <button onClick={() => setPlacementEdit({ id: s._id, name: s.name, data: { placementStatus: s.placementStatus, offeredCompany: s.offeredCompany, offeredRole: sp?.offeredRole, offeredPackage: s.ctc } })}
                             className="btn-ghost text-xs py-1 px-2 text-blue-500">Edit</button>
                           <button onClick={() => handleToggleStatus(s._id)}
                             className={`text-xs py-1 px-2 rounded-lg font-medium ${s.isActive ? 'text-red-500 hover:bg-red-50' : 'text-green-600 hover:bg-green-50'}`}>
@@ -212,14 +212,14 @@ export default function AdminStudents() {
             </div>
             <div className="grid grid-cols-2 gap-3 text-sm">
               {[
-                ['Roll Number', detailStudent.studentProfile?.rollNumber],
-                ['Department',  detailStudent.studentProfile?.department],
-                ['Batch',       detailStudent.studentProfile?.batch],
-                ['CGPA',        detailStudent.studentProfile?.cgpa],
-                ['10th %',      detailStudent.studentProfile?.tenthPercentage],
-                ['12th %',      detailStudent.studentProfile?.twelfthPercentage],
-                ['Phone',       detailStudent.studentProfile?.phone],
-                ['Status',      detailStudent.studentProfile?.placementStatus],
+                ['Roll Number', detailStudent?.rollNumber],
+                ['Department',  detailStudent?.department],
+                ['Batch',       detailStudent?.batch],
+                ['CGPA',        detailStudent?.cgpa],
+                ['10th %',      detailStudent?.tenthPercentage],
+                ['12th %',      detailStudent?.twelfthPercentage],
+                ['Phone',       detailStudent?.phone],
+                ['Status',      detailStudent?.placementStatus],
               ].map(([k, v]) => (
                 <div key={k} className="p-3 bg-gray-50 rounded-lg">
                   <p className="text-xs text-gray-400">{k}</p>
@@ -227,16 +227,16 @@ export default function AdminStudents() {
                 </div>
               ))}
             </div>
-            {detailStudent.studentProfile?.skills?.length > 0 && (
+            {detailStudent?.skills?.length > 0 && (
               <div>
                 <p className="text-sm font-medium text-gray-700 mb-2">Skills</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {detailStudent.studentProfile.skills.map(s => <span key={s} className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs">{s}</span>)}
+                  {detailStudent.skills.map(s => <span key={s} className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs">{s}</span>)}
                 </div>
               </div>
             )}
-            {detailStudent.studentProfile?.resumeUrl && (
-              <a href={detailStudent.studentProfile.resumeUrl} target="_blank" rel="noreferrer" className="btn-secondary block text-center text-sm">View Resume</a>
+            {detailStudent?.resumeUrl && (
+              <a href={detailStudent.resumeUrl} target="_blank" rel="noreferrer" className="btn-secondary block text-center text-sm">View Resume</a>
             )}
           </div>
         )}

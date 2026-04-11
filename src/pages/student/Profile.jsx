@@ -10,20 +10,20 @@ export function StudentProfile() {
   const { user, refreshUser } = useAuth()
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
-  const sp = user?.studentProfile
+  // Fields are flat on user object
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     defaultValues: {
       name: user?.name,
-      phone: sp?.phone,
-      address: sp?.address,
-      cgpa: sp?.cgpa,
-      tenthPercentage: sp?.tenthPercentage,
-      twelfthPercentage: sp?.twelfthPercentage,
-      linkedIn: sp?.linkedIn,
-      github: sp?.github,
-      portfolio: sp?.portfolio,
-      skills: sp?.skills?.join(', '),
+      phone: user?.phone,
+      address: user?.address,
+      cgpa: user?.cgpa,
+      tenthPercentage: user?.tenthPercentage,
+      twelfthPercentage: user?.twelfthPercentage,
+      linkedIn: user?.linkedin,
+      github: user?.github,
+      portfolio: user?.portfolio,
+      skills: user?.skills?.join(', '),
     }
   })
 
@@ -31,15 +31,15 @@ export function StudentProfile() {
     if (user) {
       reset({
         name: user.name,
-        phone: sp?.phone,
-        address: sp?.address,
-        cgpa: sp?.cgpa,
-        tenthPercentage: sp?.tenthPercentage,
-        twelfthPercentage: sp?.twelfthPercentage,
-        linkedIn: sp?.linkedIn,
-        github: sp?.github,
-        portfolio: sp?.portfolio,
-        skills: sp?.skills?.join(', '),
+        phone: user?.phone,
+        address: user?.address,
+        cgpa: user?.cgpa,
+        tenthPercentage: user?.tenthPercentage,
+        twelfthPercentage: user?.twelfthPercentage,
+        linkedIn: user?.linkedin,
+        github: user?.github,
+        portfolio: user?.portfolio,
+        skills: user?.skills?.join(', '),
       })
     }
   }, [user])
@@ -49,6 +49,7 @@ export function StudentProfile() {
     try {
       await api.patch('/students/profile', {
         ...data,
+        linkedin: data.linkedIn,   // form field is linkedIn, model field is linkedin
         skills: data.skills ? data.skills.split(',').map(s => s.trim()).filter(Boolean) : []
       })
       await refreshUser()
@@ -82,7 +83,7 @@ export function StudentProfile() {
       <div className="card mb-6">
         <h3 className="section-title mb-4">Resume</h3>
         <div className="flex items-center gap-4">
-          {sp?.resumeUrl ? (
+          {user?.resumeUrl ? (
             <div className="flex items-center gap-3 flex-1">
               <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
                 <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,14 +92,14 @@ export function StudentProfile() {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-700">Resume uploaded</p>
-                <a href={sp.resumeUrl} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline">View resume</a>
+                <a href={user?.resumeUrl} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline">View resume</a>
               </div>
             </div>
           ) : (
             <p className="text-sm text-amber-600 flex-1">⚠ No resume uploaded. Upload to start applying!</p>
           )}
           <label className="btn-primary cursor-pointer text-sm py-2">
-            {uploading ? 'Uploading...' : sp?.resumeUrl ? 'Update Resume' : 'Upload Resume'}
+            {uploading ? 'Uploading...' : user?.resumeUrl ? 'Update Resume' : 'Upload Resume'}
             <input type="file" accept=".pdf,.doc,.docx" onChange={handleResumeUpload} className="hidden" disabled={uploading} />
           </label>
         </div>
@@ -182,7 +183,7 @@ export function StudentProfile() {
           <button type="submit" disabled={saving} className="btn-primary">
             {saving ? 'Saving...' : 'Save Changes'}
           </button>
-          <p className="text-sm text-gray-400">Roll No: {sp?.rollNumber} · {sp?.department} · {sp?.batch}</p>
+          <p className="text-sm text-gray-400">Roll No: {user?.rollNumber} · {user?.department} · {user?.batch}</p>
         </div>
       </form>
     </div>

@@ -64,15 +64,15 @@ export default function StudentApplications() {
             <div key={app._id} className="card hover:shadow-card-hover transition-all duration-200">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                  {app.company?.companyProfile?.logoUrl
-                    ? <img src={app.company.companyProfile.logoUrl} alt="" className="w-full h-full object-cover rounded-xl" />
+                  {app.company?.logoUrl
+                    ? <img src={app.company?.logoUrl} alt="" className="w-full h-full object-cover rounded-xl" />
                     : <DocumentTextIcon className="w-6 h-6 text-gray-400" />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <h3 className="font-semibold text-gray-900">{app.job?.title}</h3>
-                      <p className="text-sm text-gray-500">{app.company?.companyProfile?.companyName}</p>
+                      <p className="text-sm text-gray-500">{app.company?.companyName || app.company?.name}</p>
                     </div>
                     <StatusBadge status={app.status} />
                   </div>
@@ -110,7 +110,7 @@ export default function StudentApplications() {
           <div className="space-y-5">
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div><p className="text-gray-400">Position</p><p className="font-medium">{detail.job?.title}</p></div>
-              <div><p className="text-gray-400">Company</p><p className="font-medium">{detail.company?.companyProfile?.companyName}</p></div>
+              <div><p className="text-gray-400">Company</p><p className="font-medium">{detail.company?.companyName || detail.company?.name}</p></div>
               <div><p className="text-gray-400">Type</p><p className="font-medium capitalize">{detail.job?.type}</p></div>
               <div><p className="text-gray-400">Status</p><StatusBadge status={detail.status} /></div>
             </div>

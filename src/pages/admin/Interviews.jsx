@@ -18,7 +18,7 @@ export default function AdminInterviews() {
   const filtered = search
     ? interviews.filter(iv =>
         iv.student?.name?.toLowerCase().includes(search.toLowerCase()) ||
-        iv.company?.companyProfile?.companyName?.toLowerCase().includes(search.toLowerCase()) ||
+        iv.company?.companyName?.toLowerCase || iv.company?.name?.toLowerCase().includes(search.toLowerCase()) ||
         iv.job?.title?.toLowerCase().includes(search.toLowerCase())
       )
     : interviews
@@ -92,7 +92,7 @@ export default function AdminInterviews() {
                             </div>
                           </td>
                           <td className="table-td">
-                            <p className="text-sm text-gray-700">{iv.company?.companyProfile?.companyName || iv.company?.name}</p>
+                            <p className="text-sm text-gray-700">{iv.company?.companyName || iv.company?.name || iv.company?.name}</p>
                           </td>
                           <td className="table-td">
                             <p className="text-sm text-gray-700">{iv.job?.title}</p>

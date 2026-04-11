@@ -28,13 +28,13 @@ function JobCard({ job, onApply }) {
     <div className="card hover:shadow-card-hover transition-all duration-200 flex flex-col">
       <div className="flex items-start gap-4 mb-4">
         <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
-          {job.company?.companyProfile?.logoUrl
-            ? <img src={job.company.companyProfile.logoUrl} alt="" className="w-full h-full object-cover" />
+          {job.company?.logoUrl
+            ? <img src={job.company?.logoUrl} alt="" className="w-full h-full object-cover" />
             : <BriefcaseIcon className="w-6 h-6 text-gray-400" />}
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-gray-900 text-base">{job.title}</h3>
-          <p className="text-sm text-gray-500">{job.company?.companyProfile?.companyName}</p>
+          <p className="text-sm text-gray-500">{job.company?.companyName || job.company?.name}</p>
         </div>
         <span className={`badge flex-shrink-0 ${job.type === 'full-time' ? 'badge-blue' : job.type === 'internship' ? 'badge-purple' : 'badge-amber'}`}>
           {job.type}
@@ -95,7 +95,7 @@ function ApplyModal({ job, onClose }) {
     <Modal open={!!job} onClose={onClose} title={`Apply for ${job?.title}`}>
       <div className="space-y-4">
         <div className="p-4 bg-gray-50 rounded-xl">
-          <p className="text-sm font-medium text-gray-700">{job?.company?.companyProfile?.companyName}</p>
+          <p className="text-sm font-medium text-gray-700">{job?.company?.companyName || job?.company?.name}</p>
           <p className="text-sm text-gray-500">{job?.type} · {job?.location}</p>
         </div>
         <div>

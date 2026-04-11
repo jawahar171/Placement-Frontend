@@ -52,27 +52,27 @@ export default function AdminCompanies() {
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {companies.map(c => {
-            const cp = c.companyProfile
+            // fields are flat on c
             return (
               <div key={c._id} className="card hover:shadow-card-hover transition-all">
                 <div className="flex items-start gap-3 mb-4">
                   <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
-                    {cp?.logoUrl
+                    {c.logoUrl
                       ? <img src={cp.logoUrl} alt="" className="w-full h-full object-cover" />
                       : <BuildingOffice2Icon className="w-6 h-6 text-gray-400" />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 truncate">{cp?.companyName || c.name}</h3>
-                    <p className="text-sm text-gray-400">{cp?.industry || 'Industry not set'}</p>
+                    <h3 className="font-semibold text-gray-900 truncate">{c.companyName || c.name}</h3>
+                    <p className="text-sm text-gray-400">{c.industry || 'Industry not set'}</p>
                   </div>
                   <span className={`badge flex-shrink-0 ${c.isActive ? 'badge-green' : 'badge-red'}`}>{c.isActive ? 'Active' : 'Inactive'}</span>
                 </div>
                 <div className="space-y-1 text-sm text-gray-500 mb-4">
                   <p>✉ {c.email}</p>
-                  {cp?.hrName   && <p>👤 {cp.hrName}</p>}
-                  {cp?.hrPhone  && <p>📞 {cp.hrPhone}</p>}
-                  {cp?.website  && <a href={cp.website} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline block truncate">🌐 {cp.website}</a>}
-                  {cp?.employeeCount && <p>👥 {cp.employeeCount} employees</p>}
+                  {c.hrName   && <p>👤 {cp.hrName}</p>}
+                  {c.hrPhone  && <p>📞 {cp.hrPhone}</p>}
+                  {c.website  && <a href={cp.website} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline block truncate">🌐 {cp.website}</a>}
+                  {c.employeeCount && <p>👥 {cp.employeeCount} employees</p>}
                 </div>
                 <div className="flex gap-2 pt-3 border-t border-gray-50">
                   <button onClick={() => setDetail(c)} className="btn-ghost text-sm py-1.5 flex-1">View Details</button>
@@ -91,14 +91,14 @@ export default function AdminCompanies() {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3 text-sm">
               {[
-                ['Company', detail.companyProfile?.companyName],
-                ['Industry', detail.companyProfile?.industry],
+                ['Company', detail?.companyName],
+                ['Industry', detail?.industry],
                 ['Email', detail.email],
-                ['Website', detail.companyProfile?.website],
-                ['HR Name', detail.companyProfile?.hrName],
-                ['HR Phone', detail.companyProfile?.hrPhone],
-                ['Employees', detail.companyProfile?.employeeCount],
-                ['Founded', detail.companyProfile?.foundedYear],
+                ['Website', detail?.website],
+                ['HR Name', detail?.hrName],
+                ['HR Phone', detail?.hrPhone],
+                ['Employees', detail?.employeeCount],
+                ['Founded', detail?.foundedYear],
               ].map(([k, v]) => (
                 <div key={k} className="p-3 bg-gray-50 rounded-lg">
                   <p className="text-xs text-gray-400">{k}</p>
@@ -106,10 +106,10 @@ export default function AdminCompanies() {
                 </div>
               ))}
             </div>
-            {detail.companyProfile?.description && (
+            {detail?.description && (
               <div>
                 <p className="text-sm font-medium text-gray-700 mb-2">About</p>
-                <p className="text-sm text-gray-600 bg-gray-50 p-4 rounded-xl">{detail.companyProfile.description}</p>
+                <p className="text-sm text-gray-600 bg-gray-50 p-4 rounded-xl">{detail.description}</p>
               </div>
             )}
           </div>

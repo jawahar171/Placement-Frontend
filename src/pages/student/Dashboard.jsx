@@ -21,7 +21,7 @@ export default function StudentDashboard() {
   if (loading) return <LoadingSpinner className="h-96" />
 
   const { stats, recentApplications, upcomingInterviews, profile } = data || {}
-  const sp = profile?.studentProfile
+  // fields are flat on profile
 
   return (
     <div className="space-y-8">
@@ -32,14 +32,14 @@ export default function StudentDashboard() {
           <p className="text-gold-400 text-sm font-medium mb-1">Welcome back</p>
           <h2 className="font-display text-2xl font-semibold">{profile?.name}</h2>
           <div className="flex flex-wrap gap-3 mt-3 text-sm text-gray-300">
-            {sp?.department && <span>🎓 {sp.department}</span>}
-            {sp?.batch && <span>📅 {sp.batch}</span>}
-            {sp?.cgpa && <span>⭐ CGPA: {sp.cgpa}</span>}
-            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${sp?.placementStatus === 'placed' ? 'bg-green-500/20 text-green-300' : 'bg-gray-500/20 text-gray-300'}`}>
-              {sp?.placementStatus?.replace(/_/g, ' ') || 'Not placed'}
+            {profile?.department && <span>🎓 {profile.department}</span>}
+            {profile?.batch && <span>📅 {profile.batch}</span>}
+            {profile?.cgpa && <span>⭐ CGPA: {profile.cgpa}</span>}
+            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${profile?.placementStatus === 'placed' ? 'bg-green-500/20 text-green-300' : 'bg-gray-500/20 text-gray-300'}`}>
+              {profile?.placementStatus?.replace(/_/g, ' ') || 'Not placed'}
             </span>
           </div>
-          {!sp?.resumeUrl && (
+          {!profile?.resumeUrl && (
             <Link to="/student/profile" className="inline-flex items-center gap-2 mt-4 bg-gold-500 text-ink-900 text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-gold-400 transition-colors">
               ⚠ Upload resume to start applying
             </Link>
@@ -71,7 +71,7 @@ export default function StudentDashboard() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate">{iv.job?.title}</p>
-                    <p className="text-xs text-gray-500">{iv.company?.companyProfile?.companyName} · {iv.roundName}</p>
+                    <p className="text-xs text-gray-500">{iv.company?.companyName || iv.company?.name} · {iv.roundName}</p>
                     <p className="text-xs text-amber-600 mt-0.5 font-medium">{dayjs(iv.scheduledAt).format('DD MMM, h:mm A')}</p>
                   </div>
                   <span className={`badge ${iv.format === 'virtual' ? 'badge-blue' : 'badge-amber'} flex-shrink-0`}>

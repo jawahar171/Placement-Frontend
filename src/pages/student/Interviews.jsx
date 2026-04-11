@@ -124,7 +124,7 @@ export default function StudentInterviews() {
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <h3 className="font-semibold text-gray-900">{iv.roundName}</h3>
-                        <p className="text-sm text-gray-500">{iv.job?.title} · {iv.company?.companyProfile?.companyName}</p>
+                        <p className="text-sm text-gray-500">{iv.job?.title} · {iv.company?.companyName || iv.company?.name}</p>
                       </div>
                       <StatusBadge status={iv.status} />
                     </div>

@@ -227,7 +227,7 @@ export default function AdminReports() {
                 <div key={item._id} className="flex items-center gap-3">
                   <span className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs font-bold text-gray-500 flex-shrink-0">{i + 1}</span>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-800">{item.company?.companyProfile?.companyName}</p>
+                    <p className="text-sm font-medium text-gray-800">{item.company?.companyName || item.company?.name}</p>
                     <div className="flex items-center gap-2 mt-1">
                       <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                         <div className="h-full bg-gold-500 rounded-full" style={{ width: `${(item.hires / topCompanies[0].hires) * 100}%` }} />
