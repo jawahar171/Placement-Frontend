@@ -3,6 +3,7 @@ import { DocumentTextIcon, StarIcon as StarOutline } from '@heroicons/react/24/o
 import { StarIcon as StarSolid } from '@heroicons/react/24/solid'
 import api from '../../utils/axios'
 import { StatusBadge, LoadingSpinner, EmptyState, Modal, Avatar } from '../../components/common/UI'
+import { openResume } from '../../utils/resumeUtils'
 import toast from 'react-hot-toast'
 import dayjs from 'dayjs'
 
@@ -130,7 +131,7 @@ export default function CompanyApplications() {
                       <div className="flex items-center gap-1">
                         <button onClick={() => setDetail(app)} className="btn-ghost text-xs py-1 px-2">View</button>
                         {app.student?.resumeUrl && (
-                          <button onClick={() => window.open(app.student?.resumeUrl, '_blank', 'noopener,noreferrer')}
+                          <button onClick={() => openResume(app.student?.resumeUrl)}
                             className="btn-ghost text-xs py-1 px-2 text-blue-500">Resume</button>
                         )}
                         {STATUS_ACTIONS[app.status]?.map(action => (
@@ -205,7 +206,7 @@ export default function CompanyApplications() {
 
             <div className="flex gap-2 pt-2 flex-wrap">
               {detail.student?.resumeUrl && (
-                <button onClick={() => window.open(detail.student?.resumeUrl, '_blank', 'noopener,noreferrer')} className="btn-secondary text-sm">View Resume</button>
+                <button onClick={() => openResume(detail.student?.resumeUrl)} className="btn-secondary text-sm">View Resume</button>
               )}
               {STATUS_ACTIONS[detail.status]?.map(action => (
                 <button key={action.next}
