@@ -236,7 +236,7 @@ export default function AdminStudents() {
               </div>
             )}
             {detailStudent?.resumeUrl && (
-              <a href={detailStudent.resumeUrl} target="_blank" rel="noreferrer" className="btn-secondary block text-center text-sm">View Resume</a>
+              <button onClick={() => window.open(detailStudent.resumeUrl, '_blank', 'noopener,noreferrer')} className="btn-secondary block text-center text-sm w-full">View Resume</button>
             )}
           </div>
         )}

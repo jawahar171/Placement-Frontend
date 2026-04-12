@@ -92,7 +92,7 @@ export function StudentProfile() {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-700">Resume uploaded</p>
-                <a href={user?.resumeUrl} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline">View resume</a>
+                <button onClick={() => window.open(user?.resumeUrl, '_blank', 'noopener,noreferrer')} className="text-xs text-blue-600 hover:underline">View resume</button>
               </div>
             </div>
           ) : (
