@@ -1,31 +1,46 @@
+import api from './axios'
+
 /**
- * Opens a resume using multiple fallback strategies:
- * 1. Direct window.open of the Cloudinary URL (works in most cases)
- * 2. Google Docs Viewer fallback if direct fails
+ * Opens a resume PDF in a new tab.
+ *
+ * Problem: Cloudinary raw/upload URLs cannot be opened by Chrome (cross-origin
+ * frame security) and Google Docs Viewer shows "No preview available" because
+ * the raw URL is not publicly accessible.
+ *
+ * Solution: Re-upload the file from raw → auto type via backend on first view.
+ * Cloudinary auto-type produces an /image/upload/ URL that Chrome opens natively.
+ * The new URL is saved to DB — subsequent opens are instant (no migration needed).
+ *
+ * @param {string} resumeUrl  - stored resume URL
+ * @param {string} [studentId] - pass when admin/company viewing another student
  */
-export function openResume(resumeUrl) {
+export async function openResume(resumeUrl, studentId = null) {
   if (!resumeUrl) return
 
-  // Strategy: try direct open first, fall back to Google Docs Viewer
-  // Use a hidden form POST to avoid popup blocker and frame context issues
-  const form = document.createElement('form')
-  form.method = 'GET'
-  form.action = `https://docs.google.com/viewer`
-  form.target = '_blank'
+  // Already auto/image type — open directly, no migration needed
+  if (!resumeUrl.includes('/raw/upload/')) {
+    window.open(resumeUrl, '_blank', 'noopener,noreferrer')
+    return
+  }
 
-  const urlInput = document.createElement('input')
-  urlInput.type = 'hidden'
-  urlInput.name = 'url'
-  urlInput.value = resumeUrl
+  // Raw URL — open blank tab synchronously (inside user gesture, never popup-blocked)
+  const tab = window.open('about:blank', '_blank')
 
-  const embeddedInput = document.createElement('input')
-  embeddedInput.type = 'hidden'
-  embeddedInput.name = 'embedded'
-  embeddedInput.value = 'false'
+  try {
+    // Trigger one-time migration: re-uploads as resource_type:auto on Cloudinary
+    const endpoint = studentId
+      ? `/students/${studentId}/resume/migrate`
+      : `/students/resume/migrate`
 
-  form.appendChild(urlInput)
-  form.appendChild(embeddedInput)
-  document.body.appendChild(form)
-  form.submit()
-  setTimeout(() => document.body.removeChild(form), 100)
+    const { data } = await api.post(endpoint)
+    const finalUrl = data.resumeUrl || resumeUrl
+
+    if (tab) tab.location.href = finalUrl
+    else window.open(finalUrl, '_blank', 'noopener,noreferrer')
+  } catch (err) {
+    console.error('Resume migration failed:', err.message)
+    // Fallback to direct URL
+    if (tab) tab.location.href = resumeUrl
+    else window.open(resumeUrl, '_blank', 'noopener,noreferrer')
+  }
 }

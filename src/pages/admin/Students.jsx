@@ -237,7 +237,7 @@ export default function AdminStudents() {
               </div>
             )}
             {detailStudent?.resumeUrl && (
-              <button onClick={() => openResume(detailStudent.resumeUrl)} className="btn-secondary block text-center text-sm w-full">View Resume</button>
+              <button onClick={() => openResume(detailStudent.resumeUrl, detailStudent._id)} className="btn-secondary block text-center text-sm w-full">View Resume</button>
             )}
           </div>
         )}
