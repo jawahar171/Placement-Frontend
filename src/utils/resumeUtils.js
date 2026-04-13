@@ -1,12 +1,11 @@
 import toast from 'react-hot-toast'
 
 /**
- * Returns props for a real <a> tag to open a resume.
- * Usage: <a {...getResumeLinkProps(url)}>View Resume</a>
+ * Returns props for a real <a> tag to open/download a resume.
  *
- * A real <a href target="_blank"> is the ONLY approach that works reliably.
- * window.open() and programmatic clicks after async code all trigger
- * chrome-error://chromewebdata/ because Chrome treats them as popups.
+ * Uses download attribute to force file download instead of browser open.
+ * This bypasses ALL chrome-error://chromewebdata/ issues caused by Chrome's
+ * PDF viewer failing to handle Cloudinary URLs in certain contexts.
  */
 export function getResumeLinkProps(resumeUrl) {
   if (!resumeUrl || resumeUrl.includes('/raw/upload/')) return null
@@ -14,13 +13,13 @@ export function getResumeLinkProps(resumeUrl) {
     href: resumeUrl,
     target: '_blank',
     rel: 'noreferrer noopener',
+    download: 'resume.pdf',
   }
 }
 
 /**
  * For old raw URLs that haven't been migrated yet.
- * Shows a toast telling the student to re-upload.
  */
 export function handleRawResume() {
-  toast.error('Resume needs to be re-uploaded. Please go to Profile and upload your resume again.')
+  toast.error('Please re-upload your resume from the Profile page to enable viewing.')
 }
