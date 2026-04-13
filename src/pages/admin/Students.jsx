@@ -3,7 +3,7 @@ import { AcademicCapIcon, FunnelIcon } from '@heroicons/react/24/outline'
 import api from '../../utils/axios'
 import { StatusBadge, LoadingSpinner, EmptyState, Modal, Avatar } from '../../components/common/UI'
 import toast from 'react-hot-toast'
-import { getResumeLinkProps, handleRawResume } from '../../utils/resumeUtils'
+import { downloadResume } from '../../utils/resumeUtils'
 
 const DEPTS = ['CSE','ECE','EEE','MECH','CIVIL','IT','AIDS','AIML','CSD']
 
@@ -237,9 +237,7 @@ export default function AdminStudents() {
               </div>
             )}
             {detailStudent?.resumeUrl && (
-              getResumeLinkProps(detailStudent.resumeUrl)
-                ? <a {...getResumeLinkProps(detailStudent.resumeUrl)} className="btn-secondary block text-center text-sm w-full">View Resume</a>
-                : <button onClick={handleRawResume} className="btn-secondary block text-center text-sm w-full">View Resume</button>
+              <button onClick={() => downloadResume(detailStudent.resumeUrl)} className="btn-secondary block text-center text-sm w-full">Download Resume</button>
             )}
           </div>
         )}

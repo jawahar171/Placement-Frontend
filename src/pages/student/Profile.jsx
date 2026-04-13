@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext'
 import api from '../../utils/axios'
 import toast from 'react-hot-toast'
 import { LoadingSpinner } from '../../components/common/UI'
-import { getResumeLinkProps, handleRawResume } from '../../utils/resumeUtils'
+import { downloadResume } from '../../utils/resumeUtils'
 
 export function StudentProfile() {
   const { user, refreshUser } = useAuth()
@@ -93,10 +93,7 @@ export function StudentProfile() {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-700">Resume uploaded</p>
-                {getResumeLinkProps(user?.resumeUrl)
-                  ? <a {...getResumeLinkProps(user?.resumeUrl)} className="text-xs text-blue-600 hover:underline">View resume</a>
-                  : <button onClick={handleRawResume} className="text-xs text-blue-600 hover:underline">View resume</button>
-                }
+                <button onClick={() => downloadResume(user?.resumeUrl)} className="text-xs text-blue-600 hover:underline">Download Resume</button>
               </div>
             </div>
           ) : (

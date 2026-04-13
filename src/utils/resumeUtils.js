@@ -1,25 +1,29 @@
 import toast from 'react-hot-toast'
 
 /**
- * Returns props for a real <a> tag to open/download a resume.
- *
- * Uses download attribute to force file download instead of browser open.
- * This bypasses ALL chrome-error://chromewebdata/ issues caused by Chrome's
- * PDF viewer failing to handle Cloudinary URLs in certain contexts.
+ * Downloads resume by fetching as blob and creating a local object URL.
+ * This bypasses ALL cross-origin restrictions — the browser downloads
+ * from a local blob URL, never touching Cloudinary directly.
  */
-export function getResumeLinkProps(resumeUrl) {
-  if (!resumeUrl || resumeUrl.includes('/raw/upload/')) return null
-  return {
-    href: resumeUrl,
-    target: '_blank',
-    rel: 'noreferrer noopener',
-    download: 'resume.pdf',
+export async function downloadResume(resumeUrl) {
+  if (!resumeUrl) return
+  const toastId = toast.loading('Downloading resume...')
+  try {
+    const res = await fetch(resumeUrl)
+    if (!res.ok) throw new Error('Failed to fetch')
+    const blob = await res.blob()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'resume.pdf'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    toast.dismiss(toastId)
+    toast.success('Resume downloaded!')
+  } catch {
+    toast.dismiss(toastId)
+    toast.error('Download failed. Please try again.')
   }
-}
-
-/**
- * For old raw URLs that haven't been migrated yet.
- */
-export function handleRawResume() {
-  toast.error('Please re-upload your resume from the Profile page to enable viewing.')
 }

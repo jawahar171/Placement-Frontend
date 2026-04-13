@@ -3,7 +3,7 @@ import { DocumentTextIcon, StarIcon as StarOutline } from '@heroicons/react/24/o
 import { StarIcon as StarSolid } from '@heroicons/react/24/solid'
 import api from '../../utils/axios'
 import { StatusBadge, LoadingSpinner, EmptyState, Modal, Avatar } from '../../components/common/UI'
-import { getResumeLinkProps, handleRawResume } from '../../utils/resumeUtils'
+import { downloadResume } from '../../utils/resumeUtils'
 import toast from 'react-hot-toast'
 import dayjs from 'dayjs'
 
@@ -131,9 +131,7 @@ export default function CompanyApplications() {
                       <div className="flex items-center gap-1">
                         <button onClick={() => setDetail(app)} className="btn-ghost text-xs py-1 px-2">View</button>
                         {app.student?.resumeUrl && (
-                          getResumeLinkProps(app.student?.resumeUrl)
-                            ? <a {...getResumeLinkProps(app.student?.resumeUrl)} className="btn-ghost text-xs py-1 px-2 text-blue-500">Resume</a>
-                            : <button onClick={handleRawResume} className="btn-ghost text-xs py-1 px-2 text-blue-500">Resume</button>
+                          <button onClick={() => downloadResume(app.student?.resumeUrl)} className="btn-ghost text-xs py-1 px-2 text-blue-500">Resume</button>
                         )}
                         {STATUS_ACTIONS[app.status]?.map(action => (
                           <button
@@ -207,9 +205,7 @@ export default function CompanyApplications() {
 
             <div className="flex gap-2 pt-2 flex-wrap">
               {detail.student?.resumeUrl && (
-                getResumeLinkProps(detail.student?.resumeUrl)
-                  ? <a {...getResumeLinkProps(detail.student?.resumeUrl)} className="btn-secondary text-sm">View Resume</a>
-                  : <button onClick={handleRawResume} className="btn-secondary text-sm">View Resume</button>
+                <button onClick={() => downloadResume(detail.student?.resumeUrl)} className="btn-secondary text-sm">Download Resume</button>
               )}
               {STATUS_ACTIONS[detail.status]?.map(action => (
                 <button key={action.next}
