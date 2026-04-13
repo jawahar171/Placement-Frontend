@@ -131,7 +131,7 @@ export default function CompanyApplications() {
                       <div className="flex items-center gap-1">
                         <button onClick={() => setDetail(app)} className="btn-ghost text-xs py-1 px-2">View</button>
                         {app.student?.resumeUrl && (
-                          <button onClick={() => openResume(app.student?.resumeUrl, app.student?._id)}
+                          <button onClick={() => openResume(app.student?.resumeUrl)}
                             className="btn-ghost text-xs py-1 px-2 text-blue-500">Resume</button>
                         )}
                         {STATUS_ACTIONS[app.status]?.map(action => (
@@ -206,7 +206,7 @@ export default function CompanyApplications() {
 
             <div className="flex gap-2 pt-2 flex-wrap">
               {detail.student?.resumeUrl && (
-                <button onClick={() => openResume(detail.student?.resumeUrl, detail.student?._id)} className="btn-secondary text-sm">View Resume</button>
+                <button onClick={() => openResume(detail.student?.resumeUrl)} className="btn-secondary text-sm">View Resume</button>
               )}
               {STATUS_ACTIONS[detail.status]?.map(action => (
                 <button key={action.next}
