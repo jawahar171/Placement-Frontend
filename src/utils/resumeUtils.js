@@ -1,46 +1,67 @@
 import api from './axios'
+import toast from 'react-hot-toast'
 
 /**
- * Opens a resume PDF in a new tab.
+ * Opens a student resume in a new tab.
  *
- * Problem: Cloudinary raw/upload URLs cannot be opened by Chrome (cross-origin
- * frame security) and Google Docs Viewer shows "No preview available" because
- * the raw URL is not publicly accessible.
- *
- * Solution: Re-upload the file from raw → auto type via backend on first view.
- * Cloudinary auto-type produces an /image/upload/ URL that Chrome opens natively.
- * The new URL is saved to DB — subsequent opens are instant (no migration needed).
- *
- * @param {string} resumeUrl  - stored resume URL
- * @param {string} [studentId] - pass when admin/company viewing another student
+ * For new uploads (resource_type:auto → /image/upload/ URL): opens directly.
+ * For old uploads (resource_type:raw → /raw/upload/ URL): fetches the file
+ * as a blob in the browser, re-uploads it through our backend as auto type,
+ * saves the new URL, then opens it. This works because the browser CAN fetch
+ * the raw Cloudinary URL directly (it's publicly accessible) — the issue was
+ * only with OPENING it in a tab (chrome-error frame restriction).
  */
 export async function openResume(resumeUrl, studentId = null) {
   if (!resumeUrl) return
 
-  // Already auto/image type — open directly, no migration needed
+  // Already auto/image type — open directly
   if (!resumeUrl.includes('/raw/upload/')) {
     window.open(resumeUrl, '_blank', 'noopener,noreferrer')
     return
   }
 
-  // Raw URL — open blank tab synchronously (inside user gesture, never popup-blocked)
-  const tab = window.open('about:blank', '_blank')
+  const toastId = toast.loading('Preparing resume...')
 
   try {
-    // Trigger one-time migration: re-uploads as resource_type:auto on Cloudinary
-    const endpoint = studentId
-      ? `/students/${studentId}/resume/migrate`
-      : `/students/resume/migrate`
+    // Step 1: fetch the file as a blob FROM the browser
+    // The browser CAN access this URL directly — the issue is only with OPENING it in a tab
+    const response = await fetch(resumeUrl)
+    if (!response.ok) throw new Error(`Fetch failed: ${response.status}`)
 
-    const { data } = await api.post(endpoint)
-    const finalUrl = data.resumeUrl || resumeUrl
+    const blob = await response.blob()
 
-    if (tab) tab.location.href = finalUrl
-    else window.open(finalUrl, '_blank', 'noopener,noreferrer')
+    // Step 2: re-upload through our backend as FormData
+    // This hits the existing /resume endpoint which uses resource_type:'auto'
+    const formData = new FormData()
+    const filename = resumeUrl.split('/').pop() || 'resume.pdf'
+    formData.append('resume', blob, filename)
+
+    // Use correct endpoint based on who is viewing
+    let uploadRes
+    if (studentId) {
+      // Admin/company: upload on behalf of the student
+      uploadRes = await api.post(`/students/${studentId}/resume/upload-migrate`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+    } else {
+      // Student viewing own resume
+      uploadRes = await api.post('/students/resume', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+    }
+
+    const newUrl = uploadRes.data?.resumeUrl || uploadRes.data?.student?.resumeUrl
+    toast.dismiss(toastId)
+
+    if (newUrl) {
+      window.open(newUrl, '_blank', 'noopener,noreferrer')
+    } else {
+      throw new Error('No URL returned')
+    }
   } catch (err) {
-    console.error('Resume migration failed:', err.message)
-    // Fallback to direct URL
-    if (tab) tab.location.href = resumeUrl
-    else window.open(resumeUrl, '_blank', 'noopener,noreferrer')
+    toast.dismiss(toastId)
+    console.error('openResume error:', err.message)
+    // Show clear message instead of opening a broken tab
+    toast.error('Could not open resume. Please ask the student to re-upload their resume.')
   }
 }
