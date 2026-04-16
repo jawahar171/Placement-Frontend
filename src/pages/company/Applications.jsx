@@ -14,6 +14,93 @@ const STATUS_ACTIONS = {
   interview_completed: [{ label: 'Make Offer', next: 'offered', cls: 'btn-primary' }, { label: 'Reject', next: 'rejected', cls: 'btn-danger' }],
 }
 
+function ScheduleInterviewModal({ app, onClose, onScheduled }) {
+  const [form, setForm] = useState({
+    scheduledAt: '', format: 'virtual', round: 1,
+    roundName: 'Technical Round', duration: 60, venue: '', agenda: ''
+  })
+  const [loading, setLoading] = useState(false)
+  const roundNames = ['Technical Round','HR Round','Aptitude Test','Group Discussion','Managerial Round','Final Round']
+
+  const handleSubmit = async () => {
+    if (!form.scheduledAt) { toast.error('Please select date and time'); return }
+    setLoading(true)
+    try {
+      await api.post('/interviews/schedule', { applicationId: app._id, ...form })
+      toast.success('Interview scheduled!')
+      onScheduled()
+      onClose()
+    } catch (err) { toast.error(err.response?.data?.message || 'Failed to schedule') }
+    finally { setLoading(false) }
+  }
+
+  return (
+    <Modal open={!!app} onClose={onClose} title={`Schedule Interview — ${app?.student?.name}`} size="lg">
+      <div className="space-y-4">
+        <div className="p-3 bg-gray-50 rounded-xl text-sm text-gray-600">
+          <strong>{app?.student?.name}</strong> · {app?.job?.title}
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="col-span-2">
+            <label className="label">Date &amp; Time <span className="text-red-400">*</span></label>
+            <input type="datetime-local" value={form.scheduledAt}
+              min={new Date().toISOString().slice(0,16)}
+              onChange={e => setForm(p => ({ ...p, scheduledAt: e.target.value }))} className="input" />
+          </div>
+          <div>
+            <label className="label">Round</label>
+            <input type="number" min="1" value={form.round}
+              onChange={e => setForm(p => ({ ...p, round: parseInt(e.target.value) }))} className="input" />
+          </div>
+          <div>
+            <label className="label">Round Name</label>
+            <select value={form.roundName} onChange={e => setForm(p => ({ ...p, roundName: e.target.value }))} className="input">
+              {roundNames.map(r => <option key={r} value={r}>{r}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="label">Format</label>
+            <select value={form.format} onChange={e => setForm(p => ({ ...p, format: e.target.value }))} className="input">
+              <option value="virtual">Virtual (Video Call)</option>
+              <option value="in-person">In-Person</option>
+              <option value="phone">Phone</option>
+            </select>
+          </div>
+          <div>
+            <label className="label">Duration (min)</label>
+            <input type="number" value={form.duration}
+              onChange={e => setForm(p => ({ ...p, duration: parseInt(e.target.value) }))} className="input" />
+          </div>
+          {form.format === 'in-person' && (
+            <div className="col-span-2">
+              <label className="label">Venue</label>
+              <input value={form.venue} onChange={e => setForm(p => ({ ...p, venue: e.target.value }))}
+                placeholder="Conference Room A" className="input" />
+            </div>
+          )}
+        </div>
+        <div>
+          <label className="label">Agenda / Notes</label>
+          <textarea rows={2} value={form.agenda}
+            onChange={e => setForm(p => ({ ...p, agenda: e.target.value }))}
+            placeholder="Topics to cover, preparation tips..." className="input resize-none" />
+        </div>
+        {form.format === 'virtual' && (
+          <p className="text-xs text-blue-600 bg-blue-50 px-3 py-2 rounded-lg">
+            🎥 A video meeting room will be automatically created
+          </p>
+        )}
+        <div className="flex gap-3 pt-2">
+          <button onClick={onClose} className="btn-secondary flex-1">Cancel</button>
+          <button onClick={handleSubmit} disabled={loading} className="btn-primary flex-1">
+            {loading ? 'Scheduling...' : 'Schedule Interview'}
+          </button>
+        </div>
+      </div>
+    </Modal>
+  )
+}
+
 export default function CompanyApplications() {
   const [apps, setApps]           = useState([])
   const [loading, setLoading]     = useState(true)
@@ -22,6 +109,7 @@ export default function CompanyApplications() {
   const [detail, setDetail]       = useState(null)
   const [offerModal, setOfferModal] = useState(null)
   const [offerData, setOfferData]   = useState({ offeredPackage: '', offeredRole: '', offerDeadline: '', feedback: '' })
+  const [scheduleApp, setScheduleApp] = useState(null)  // app to schedule interview for
 
   const fetchApps = () => {
     const params = new URLSearchParams()
@@ -136,7 +224,7 @@ export default function CompanyApplications() {
                         {STATUS_ACTIONS[app.status]?.map(action => (
                           <button
                             key={action.next}
-                            onClick={() => action.next === 'offered' ? setOfferModal(app) : updateStatus(app._id, action.next)}
+                            onClick={() => action.next === 'offered' ? setOfferModal(app) : action.next === 'interview_scheduled' ? setScheduleApp(app) : updateStatus(app._id, action.next)}
                             className={`text-xs py-1 px-2 rounded-lg font-medium transition-colors ${action.cls === 'btn-primary' ? 'bg-gold-500 hover:bg-gold-600 text-ink-900' : action.cls === 'btn-danger' ? 'bg-red-50 hover:bg-red-100 text-red-600' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
                           >
                             {action.label}
@@ -209,7 +297,7 @@ export default function CompanyApplications() {
               )}
               {STATUS_ACTIONS[detail.status]?.map(action => (
                 <button key={action.next}
-                  onClick={() => action.next === 'offered' ? (setOfferModal(detail), setDetail(null)) : updateStatus(detail._id, action.next)}
+                  onClick={() => action.next === 'offered' ? (setOfferModal(detail), setDetail(null)) : action.next === 'interview_scheduled' ? (setScheduleApp(detail), setDetail(null)) : updateStatus(detail._id, action.next)}
                   className={`text-sm py-2 px-4 rounded-xl font-medium transition-colors ${action.cls === 'btn-primary' ? 'bg-gold-500 hover:bg-gold-600 text-ink-900' : action.cls === 'btn-danger' ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
                 >
                   {action.label}
@@ -249,6 +337,7 @@ export default function CompanyApplications() {
           </div>
         </div>
       </Modal>
+      <ScheduleInterviewModal app={scheduleApp} onClose={() => setScheduleApp(null)} onScheduled={fetchApps} />
     </div>
   )
 }

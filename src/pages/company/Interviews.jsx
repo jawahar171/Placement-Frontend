@@ -15,7 +15,14 @@ function ScheduleModal({ open, onClose, onScheduled }) {
 
   useEffect(() => {
     if (open) {
-      api.get('/applications/company?status=shortlisted').then(r => setApps(r.data.applications))
+      // Fetch both shortlisted and interview_scheduled candidates
+      Promise.all([
+        api.get('/applications/company?status=shortlisted'),
+        api.get('/applications/company?status=interview_scheduled'),
+      ]).then(([r1, r2]) => {
+        const all = [...(r1.data.applications || []), ...(r2.data.applications || [])]
+        setApps(all)
+      }).catch(() => setApps([]))
     }
   }, [open])
 
