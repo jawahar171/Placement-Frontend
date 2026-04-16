@@ -20,19 +20,54 @@ function ScheduleModal({ open, onClose, onScheduled }) {
   }, [open])
 
   const handleSubmit = async () => {
-    if (!form.applicationId || !form.scheduledAt) { toast.error('Select candidate and schedule time'); return }
+    if (!form.applicationId || !form.scheduledAt) { 
+      toast.error('Select candidate and schedule time')
+      return 
+    }
+
+    // Validate that the scheduled date is in the future
+    const scheduledDate = new Date(form.scheduledAt)
+    const now = new Date()
+    if (scheduledDate < now) {
+      toast.error('Cannot schedule interview in the past')
+      return
+    }
+
     setLoading(true)
     try {
-      await api.post('/interviews/schedule', form)
+      // Convert datetime-local format to ISO string
+      const scheduledAtISO = new Date(form.scheduledAt).toISOString()
+      
+      const payload = {
+        ...form,
+        scheduledAt: scheduledAtISO,
+        round: parseInt(form.round),
+        duration: parseInt(form.duration)
+      }
+
+      await api.post('/interviews/schedule', payload)
       toast.success('Interview scheduled!')
       onScheduled()
       onClose()
-      setForm({ applicationId: '', scheduledAt: '', format: 'virtual', round: 1, roundName: 'Technical Round', duration: 60, venue: '', agenda: '' })
-    } catch (err) { toast.error(err.response?.data?.message || 'Failed to schedule') }
+      setForm({ 
+        applicationId: '', scheduledAt: '', format: 'virtual', 
+        round: 1, roundName: 'Technical Round', duration: 60, venue: '', agenda: '' 
+      })
+    } catch (err) { 
+      console.error('Schedule error:', err)
+      toast.error(err.response?.data?.message || 'Failed to schedule') 
+    }
     finally { setLoading(false) }
   }
 
   const roundNames = ['Technical Round', 'HR Round', 'Aptitude Test', 'Group Discussion', 'Managerial Round', 'Final Round']
+
+  // Get minimum datetime (now + 1 hour)
+  const getMinDateTime = () => {
+    const now = new Date()
+    now.setHours(now.getHours() + 1)
+    return now.toISOString().slice(0, 16)
+  }
 
   return (
     <Modal open={open} onClose={onClose} title="Schedule Interview" size="lg">
@@ -53,15 +88,22 @@ function ScheduleModal({ open, onClose, onScheduled }) {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="label">Date & Time <span className="text-red-400">*</span></label>
-            <input type="datetime-local" value={form.scheduledAt} onChange={e => setForm(p => ({ ...p, scheduledAt: e.target.value }))} className="input" />
+            <input 
+              type="datetime-local" 
+              value={form.scheduledAt} 
+              onChange={e => setForm(p => ({ ...p, scheduledAt: e.target.value }))} 
+              min={getMinDateTime()}
+              className="input" 
+            />
+            <p className="text-xs text-gray-500 mt-1">Select future date & time</p>
           </div>
           <div>
             <label className="label">Duration (minutes)</label>
-            <input type="number" value={form.duration} onChange={e => setForm(p => ({ ...p, duration: e.target.value }))} className="input" />
+            <input type="number" min="15" max="240" value={form.duration} onChange={e => setForm(p => ({ ...p, duration: e.target.value }))} className="input" />
           </div>
           <div>
             <label className="label">Round Number</label>
-            <input type="number" min="1" value={form.round} onChange={e => setForm(p => ({ ...p, round: e.target.value }))} className="input" />
+            <input type="number" min="1" max="10" value={form.round} onChange={e => setForm(p => ({ ...p, round: e.target.value }))} className="input" />
           </div>
           <div>
             <label className="label">Round Name</label>
