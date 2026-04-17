@@ -17,7 +17,7 @@ const STATUS_ACTIONS = {
 function ScheduleInterviewModal({ app, onClose, onScheduled }) {
   const [form, setForm] = useState({
     scheduledAt: '', format: 'virtual', round: 1,
-    roundName: 'Technical Round', duration: 60, venue: '', agenda: ''
+    roundName: 'Technical Round', duration: 60, venue: '', agenda: '', meetingLink: ''
   })
   const [loading, setLoading] = useState(false)
   const roundNames = ['Technical Round','HR Round','Aptitude Test','Group Discussion','Managerial Round','Final Round']
@@ -86,9 +86,20 @@ function ScheduleInterviewModal({ app, onClose, onScheduled }) {
             placeholder="Topics to cover, preparation tips..." className="input resize-none" />
         </div>
         {form.format === 'virtual' && (
-          <p className="text-xs text-blue-600 bg-blue-50 px-3 py-2 rounded-lg">
-            🎥 A video meeting room will be automatically created
-          </p>
+          <div className="space-y-2">
+            <div>
+              <label className="label">Meeting Link <span className="text-gray-400 font-normal">(optional — leave blank to auto-generate Google Meet)</span></label>
+              <input
+                value={form.meetingLink}
+                onChange={e => setForm(p => ({ ...p, meetingLink: e.target.value }))}
+                placeholder="https://meet.google.com/xxx-xxxx-xxx or Zoom/Teams link"
+                className="input"
+              />
+            </div>
+            <p className="text-xs text-blue-600 bg-blue-50 px-3 py-2 rounded-lg">
+              🎥 Leave blank to auto-generate a Google Meet link
+            </p>
+          </div>
         )}
         <div className="flex gap-3 pt-2">
           <button onClick={onClose} className="btn-secondary flex-1">Cancel</button>
