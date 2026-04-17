@@ -145,7 +145,7 @@ curl -X POST http://localhost:5000/api/auth/register \
 ### Student Portal
 - Browse & apply for jobs (with eligibility check)
 - Track application status & timeline
-- View & join video interviews (Daily.co)
+- View & join video interviews (google meet)
 - Register for placement drives
 - Upload resume (Cloudinary)
 - Profile management with academic records
