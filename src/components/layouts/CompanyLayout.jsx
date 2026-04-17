@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import Sidebar from '../common/Sidebar'
+import QueryChatBox from '../common/QueryChatBox'
 import {
   HomeIcon, PlusCircleIcon, BriefcaseIcon,
   DocumentTextIcon, CalendarIcon, BuildingOffice2Icon
@@ -25,6 +26,7 @@ export default function CompanyLayout() {
           </div>
         </div>
       </main>
+      <QueryChatBox />
     </div>
   )
 }
