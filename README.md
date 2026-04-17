@@ -11,7 +11,7 @@ A full-stack MERN application for managing college placements — students, comp
 | Auth      | JWT + bcryptjs |
 | File Upload | Cloudinary (resumes & images) |
 | Email     | Nodemailer (Gmail SMTP) |
-| Video     | Daily.co API |
+| Video     | |
 | Deploy    | Netlify (frontend) + Render (backend) |
 
 ---
@@ -75,7 +75,6 @@ EMAIL_PORT=587
 EMAIL_USER=your@gmail.com
 EMAIL_PASS=your_app_password   # Gmail App Password, not account password
 
-DAILY_API_KEY=your_daily_co_key   # optional, works without for dev
 
 CLIENT_URL=http://localhost:5173
 ```
