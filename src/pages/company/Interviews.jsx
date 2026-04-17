@@ -4,49 +4,122 @@ import api from '../../utils/axios'
 import { StatusBadge, LoadingSpinner, EmptyState, Modal, Avatar } from '../../components/common/UI'
 import toast from 'react-hot-toast'
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
 
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
+const IST = 'Asia/Kolkata'
+
+// ── Convert "2026-05-01T11:30" from datetime-local into a proper ISO string
+// with IST offset so the backend/MongoDB stores the correct UTC time.
+// Without this, the Render server (UTC) treats the bare string as UTC,
+// making every time appear 5h 30min LATER when displayed back in IST.
+const localToIST = (datetimeLocalValue) => {
+  // datetimeLocalValue = "YYYY-MM-DDTHH:mm"  (no timezone, browser local)
+  // We want to treat it as IST explicitly:
+  return dayjs.tz(datetimeLocalValue, IST).toISOString()
+  // e.g.  "2026-05-01T11:30" → "2026-05-01T06:00:00.000Z"  (06:00 UTC = 11:30 IST)
+}
+
+// ── Format a UTC ISO string back for display in IST
+const fmtIST = (isoString) =>
+  dayjs(isoString).tz(IST).format('DD MMM YYYY, h:mm A') + ' IST'
+
+// ── Detect meeting provider for a friendly badge
+const getMeetingProvider = (url) => {
+  if (!url) return null
+  if (url.includes('meet.google.com')) return { label: 'Google Meet', color: 'text-green-600 bg-green-50' }
+  if (url.includes('zoom.us'))         return { label: 'Zoom',        color: 'text-blue-600  bg-blue-50'  }
+  if (url.includes('teams.microsoft')) return { label: 'MS Teams',    color: 'text-purple-600 bg-purple-50' }
+  return { label: 'Meeting Link', color: 'text-gray-600 bg-gray-50' }
+}
+
+const getMeetingIcon = (url) => {
+  if (!url) return '🔗'
+  if (url.includes('meet.google.com')) return '🟢'
+  if (url.includes('zoom.us'))         return '🔵'
+  if (url.includes('teams.microsoft')) return '🟣'
+  return '🔗'
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 function ScheduleModal({ open, onClose, onScheduled }) {
-  const [apps, setApps]     = useState([])
-  const [form, setForm]     = useState({
+  const [apps, setApps] = useState([])
+  const [form, setForm] = useState({
     applicationId: '', scheduledAt: '', format: 'virtual',
-    round: 1, roundName: 'Technical Round', duration: 60, venue: '', agenda: '', meetingLink: ''
+    round: 1, roundName: 'Technical Round', duration: 60,
+    venue: '', agenda: '', meetingUrl: ''
   })
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (open) {
-      // Fetch both shortlisted and interview_scheduled candidates
-      Promise.all([
-        api.get('/applications/company?status=shortlisted'),
-        api.get('/applications/company?status=interview_scheduled'),
-      ]).then(([r1, r2]) => {
-        const all = [...(r1.data.applications || []), ...(r2.data.applications || [])]
-        setApps(all)
-      }).catch(() => setApps([]))
-    }
+    if (!open) return
+    Promise.all([
+      api.get('/applications/company?status=shortlisted'),
+      api.get('/applications/company?status=interview_scheduled'),
+    ]).then(([r1, r2]) => {
+      setApps([...(r1.data.applications || []), ...(r2.data.applications || [])])
+    }).catch(() => setApps([]))
   }, [open])
 
   const handleSubmit = async () => {
-    if (!form.applicationId || !form.scheduledAt) { toast.error('Select candidate and schedule time'); return }
+    if (!form.applicationId || !form.scheduledAt) {
+      toast.error('Select a candidate and set a date/time')
+      return
+    }
+    if (form.format === 'virtual' && !form.meetingUrl.trim()) {
+      toast.error('Please paste a Google Meet or Zoom link')
+      return
+    }
+
     setLoading(true)
     try {
-      await api.post('/interviews/schedule', form)
+      // ⬇ KEY FIX: convert the datetime-local string to a proper IST ISO string
+      //   so the backend stores the correct UTC value instead of treating it as UTC directly.
+      const payload = {
+        ...form,
+        scheduledAt: localToIST(form.scheduledAt),
+      }
+      await api.post('/interviews/schedule', payload)
       toast.success('Interview scheduled!')
       onScheduled()
       onClose()
-      setForm({ applicationId: '', scheduledAt: '', format: 'virtual', round: 1, roundName: 'Technical Round', duration: 60, venue: '', agenda: '', meetingLink: '' })
-    } catch (err) { toast.error(err.response?.data?.message || 'Failed to schedule') }
-    finally { setLoading(false) }
+      setForm({
+        applicationId: '', scheduledAt: '', format: 'virtual',
+        round: 1, roundName: 'Technical Round', duration: 60,
+        venue: '', agenda: '', meetingUrl: ''
+      })
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || 'Failed to schedule'
+      toast.error(msg)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const roundNames = ['Technical Round', 'HR Round', 'Aptitude Test', 'Group Discussion', 'Managerial Round', 'Final Round']
+  const roundNames = [
+    'Technical Round', 'HR Round', 'Aptitude Test',
+    'Group Discussion', 'Managerial Round', 'Final Round'
+  ]
+
+  const provider = getMeetingProvider(form.meetingUrl)
 
   return (
     <Modal open={open} onClose={onClose} title="Schedule Interview" size="lg">
       <div className="space-y-4">
+
+        {/* Candidate */}
         <div>
-          <label className="label">Select Shortlisted Candidate <span className="text-red-400">*</span></label>
-          <select value={form.applicationId} onChange={e => setForm(p => ({ ...p, applicationId: e.target.value }))} className="input">
+          <label className="label">
+            Select Shortlisted Candidate <span className="text-red-400">*</span>
+          </label>
+          <select
+            value={form.applicationId}
+            onChange={e => setForm(p => ({ ...p, applicationId: e.target.value }))}
+            className="input"
+          >
             <option value="">Choose candidate...</option>
             {apps.map(app => (
               <option key={app._id} value={app._id}>
@@ -54,65 +127,140 @@ function ScheduleModal({ open, onClose, onScheduled }) {
               </option>
             ))}
           </select>
-          {apps.length === 0 && <p className="text-xs text-amber-600 mt-1">No shortlisted applications found. Shortlist candidates first.</p>}
+          {apps.length === 0 && (
+            <p className="text-xs text-amber-600 mt-1">
+              No shortlisted applications. Shortlist candidates first.
+            </p>
+          )}
         </div>
 
+        {/* Grid fields */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="label">Date & Time <span className="text-red-400">*</span></label>
-            <input type="datetime-local" value={form.scheduledAt} onChange={e => setForm(p => ({ ...p, scheduledAt: e.target.value }))} className="input" />
+            <label className="label">
+              Date & Time (IST) <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="datetime-local"
+              value={form.scheduledAt}
+              onChange={e => setForm(p => ({ ...p, scheduledAt: e.target.value }))}
+              className="input"
+            />
+            {/* Preview so the company can confirm the IST time before submitting */}
+            {form.scheduledAt && (
+              <p className="text-xs text-green-600 mt-1">
+                ✓ Will be saved as: {fmtIST(localToIST(form.scheduledAt))}
+              </p>
+            )}
           </div>
+
           <div>
             <label className="label">Duration (minutes)</label>
-            <input type="number" value={form.duration} onChange={e => setForm(p => ({ ...p, duration: e.target.value }))} className="input" />
+            <input
+              type="number"
+              value={form.duration}
+              onChange={e => setForm(p => ({ ...p, duration: e.target.value }))}
+              className="input"
+            />
           </div>
+
           <div>
             <label className="label">Round Number</label>
-            <input type="number" min="1" value={form.round} onChange={e => setForm(p => ({ ...p, round: e.target.value }))} className="input" />
+            <input
+              type="number"
+              min="1"
+              value={form.round}
+              onChange={e => setForm(p => ({ ...p, round: e.target.value }))}
+              className="input"
+            />
           </div>
+
           <div>
             <label className="label">Round Name</label>
-            <select value={form.roundName} onChange={e => setForm(p => ({ ...p, roundName: e.target.value }))} className="input">
+            <select
+              value={form.roundName}
+              onChange={e => setForm(p => ({ ...p, roundName: e.target.value }))}
+              className="input"
+            >
               {roundNames.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
           </div>
+
           <div>
             <label className="label">Format</label>
-            <select value={form.format} onChange={e => setForm(p => ({ ...p, format: e.target.value }))} className="input">
+            <select
+              value={form.format}
+              onChange={e => setForm(p => ({ ...p, format: e.target.value, meetingUrl: '', venue: '' }))}
+              className="input"
+            >
               <option value="virtual">Virtual (Video Call)</option>
               <option value="in-person">In-Person</option>
               <option value="phone">Phone</option>
             </select>
           </div>
+
           {form.format === 'in-person' && (
             <div>
               <label className="label">Venue</label>
-              <input value={form.venue} onChange={e => setForm(p => ({ ...p, venue: e.target.value }))} placeholder="Conference Room A" className="input" />
+              <input
+                value={form.venue}
+                onChange={e => setForm(p => ({ ...p, venue: e.target.value }))}
+                placeholder="Conference Room A"
+                className="input"
+              />
             </div>
           )}
         </div>
 
-        <div>
-          <label className="label">Agenda / Notes</label>
-          <textarea rows={2} value={form.agenda} onChange={e => setForm(p => ({ ...p, agenda: e.target.value }))} placeholder="Topics to cover, preparation tips..." className="input resize-none" />
-        </div>
-
+        {/* Meeting link (replaces Daily.co auto-generation) */}
         {form.format === 'virtual' && (
-          <div className="space-y-2">
-            <div>
-              <label className="label">Meeting Link <span className="text-gray-400 font-normal">(optional — leave blank to auto-generate Google Meet)</span></label>
+          <div>
+            <label className="label">
+              Meeting Link <span className="text-red-400">*</span>
+            </label>
+            <div className="relative">
               <input
-                value={form.meetingLink}
-                onChange={e => setForm(p => ({ ...p, meetingLink: e.target.value }))}
-                placeholder="https://meet.google.com/xxx-xxxx-xxx or Zoom/Teams link"
-                className="input"
+                value={form.meetingUrl}
+                onChange={e => setForm(p => ({ ...p, meetingUrl: e.target.value }))}
+                placeholder="https://meet.google.com/xxx-xxxx-xxx   or   https://zoom.us/j/..."
+                className="input pr-28"
               />
+              {provider && (
+                <span className={`absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium px-2 py-0.5 rounded-full ${provider.color}`}>
+                  {provider.label}
+                </span>
+              )}
             </div>
-            <p className="text-xs text-blue-600 bg-blue-50 px-3 py-2 rounded-lg">
-              🎥 Leave blank to auto-generate a Google Meet link
-            </p>
+            <div className="flex items-center justify-between mt-1.5">
+              <p className="text-xs text-gray-400">
+                Create a meeting first, paste the link here. It will be emailed to the student.
+              </p>
+              <div className="flex gap-2 ml-3 flex-shrink-0">
+                <a href="https://meet.google.com/new" target="_blank" rel="noreferrer"
+                  className="text-xs text-green-600 hover:underline font-medium">
+                  + Google Meet
+                </a>
+                <span className="text-gray-300">|</span>
+                <a href="https://zoom.us/meeting/schedule" target="_blank" rel="noreferrer"
+                  className="text-xs text-blue-600 hover:underline font-medium">
+                  + Zoom
+                </a>
+              </div>
+            </div>
           </div>
         )}
+
+        {/* Agenda */}
+        <div>
+          <label className="label">Agenda / Notes</label>
+          <textarea
+            rows={2}
+            value={form.agenda}
+            onChange={e => setForm(p => ({ ...p, agenda: e.target.value }))}
+            placeholder="Topics to cover, preparation tips..."
+            className="input resize-none"
+          />
+        </div>
 
         <div className="flex gap-3 pt-2">
           <button onClick={onClose} className="btn-secondary flex-1">Cancel</button>
@@ -125,6 +273,7 @@ function ScheduleModal({ open, onClose, onScheduled }) {
   )
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
 function FeedbackModal({ interview, onClose, onSaved }) {
   const [feedback, setFeedback] = useState({
     technicalRating: 3, communicationRating: 3, problemSolvingRating: 3,
@@ -139,17 +288,23 @@ function FeedbackModal({ interview, onClose, onSaved }) {
       toast.success('Feedback submitted')
       onSaved()
       onClose()
-    } catch { toast.error('Failed to save feedback') }
-    finally { setSaving(false) }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to save feedback')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const RatingRow = ({ label, field }) => (
     <div className="flex items-center justify-between">
       <span className="text-sm text-gray-600">{label}</span>
       <div className="flex gap-1">
-        {[1,2,3,4,5].map(n => (
-          <button key={n} type="button" onClick={() => setFeedback(p => ({ ...p, [field]: n }))}
-            className={`w-8 h-8 rounded-lg text-sm font-medium transition-all ${feedback[field] >= n ? 'bg-gold-500 text-ink-900' : 'bg-gray-100 text-gray-400'}`}>
+        {[1, 2, 3, 4, 5].map(n => (
+          <button key={n} type="button"
+            onClick={() => setFeedback(p => ({ ...p, [field]: n }))}
+            className={`w-8 h-8 rounded-lg text-sm font-medium transition-all ${
+              feedback[field] >= n ? 'bg-gold-500 text-ink-900' : 'bg-gray-100 text-gray-400'
+            }`}>
             {n}
           </button>
         ))}
@@ -161,25 +316,38 @@ function FeedbackModal({ interview, onClose, onSaved }) {
     <Modal open={!!interview} onClose={onClose} title="Submit Interview Feedback" size="lg">
       <div className="space-y-5">
         <div className="space-y-3">
-          <RatingRow label="Technical Skills" field="technicalRating" />
-          <RatingRow label="Communication"    field="communicationRating" />
-          <RatingRow label="Problem Solving"  field="problemSolvingRating" />
-          <RatingRow label="Overall Rating"   field="overallRating" />
+          <RatingRow label="Technical Skills"  field="technicalRating" />
+          <RatingRow label="Communication"     field="communicationRating" />
+          <RatingRow label="Problem Solving"   field="problemSolvingRating" />
+          <RatingRow label="Overall Rating"    field="overallRating" />
         </div>
         <div>
           <label className="label">Strengths</label>
-          <textarea rows={2} value={feedback.strengths} onChange={e => setFeedback(p => ({ ...p, strengths: e.target.value }))} placeholder="What impressed you about this candidate..." className="input resize-none" />
+          <textarea rows={2} value={feedback.strengths}
+            onChange={e => setFeedback(p => ({ ...p, strengths: e.target.value }))}
+            placeholder="What impressed you about this candidate..."
+            className="input resize-none" />
         </div>
         <div>
           <label className="label">Areas for Improvement</label>
-          <textarea rows={2} value={feedback.improvements} onChange={e => setFeedback(p => ({ ...p, improvements: e.target.value }))} placeholder="What could be better..." className="input resize-none" />
+          <textarea rows={2} value={feedback.improvements}
+            onChange={e => setFeedback(p => ({ ...p, improvements: e.target.value }))}
+            placeholder="What could be better..."
+            className="input resize-none" />
         </div>
         <div>
           <label className="label">Result</label>
           <div className="flex gap-2">
-            {[{v:'pass',label:'Pass',cls:'bg-green-500 text-white'},{v:'fail',label:'Fail',cls:'bg-red-500 text-white'},{v:'hold',label:'Hold',cls:'bg-amber-500 text-white'}].map(r => (
-              <button key={r.v} type="button" onClick={() => setFeedback(p => ({ ...p, result: r.v }))}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${feedback.result === r.v ? r.cls : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
+            {[
+              { v: 'pass', label: 'Pass', cls: 'bg-green-500 text-white' },
+              { v: 'fail', label: 'Fail', cls: 'bg-red-500   text-white' },
+              { v: 'hold', label: 'Hold', cls: 'bg-amber-500 text-white' }
+            ].map(r => (
+              <button key={r.v} type="button"
+                onClick={() => setFeedback(p => ({ ...p, result: r.v }))}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                  feedback.result === r.v ? r.cls : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                }`}>
                 {r.label}
               </button>
             ))}
@@ -187,30 +355,35 @@ function FeedbackModal({ interview, onClose, onSaved }) {
         </div>
         <div className="flex gap-3 pt-2">
           <button onClick={onClose} className="btn-secondary flex-1">Cancel</button>
-          <button onClick={handleSave} disabled={saving} className="btn-primary flex-1">{saving ? 'Saving...' : 'Submit Feedback'}</button>
+          <button onClick={handleSave} disabled={saving} className="btn-primary flex-1">
+            {saving ? 'Saving...' : 'Submit Feedback'}
+          </button>
         </div>
       </div>
     </Modal>
   )
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
 export default function CompanyInterviews() {
-  const [interviews, setInterviews] = useState([])
-  const [loading, setLoading]       = useState(true)
+  const [interviews, setInterviews]     = useState([])
+  const [loading, setLoading]           = useState(true)
   const [scheduleOpen, setScheduleOpen] = useState(false)
   const [feedbackFor, setFeedbackFor]   = useState(null)
-  const [filter, setFilter] = useState('upcoming')
+  const [filter, setFilter]             = useState('upcoming')
 
   const fetchInterviews = () => {
-    api.get('/interviews/my').then(r => { setInterviews(r.data); setLoading(false) })
+    api.get('/interviews/my')
+      .then(r => { setInterviews(r.data); setLoading(false) })
+      .catch(() => setLoading(false))
   }
 
   useEffect(() => { fetchInterviews() }, [])
 
   const filtered = interviews.filter(iv => {
-    const isPast = dayjs(iv.scheduledAt).isBefore(dayjs())
+    const isPast = dayjs(iv.scheduledAt).tz(IST).isBefore(dayjs().tz(IST))
     if (filter === 'upcoming') return !isPast && iv.status !== 'cancelled'
-    if (filter === 'past')     return isPast || iv.status === 'completed'
+    if (filter === 'past')     return  isPast || iv.status === 'completed'
     return true
   })
 
@@ -220,7 +393,9 @@ export default function CompanyInterviews() {
       await api.patch(`/interviews/${id}/cancel`, { reason })
       toast.success('Interview cancelled')
       fetchInterviews()
-    } catch { toast.error('Failed') }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to cancel')
+    }
   }
 
   if (loading) return <LoadingSpinner />
@@ -234,19 +409,30 @@ export default function CompanyInterviews() {
         </div>
         <div className="flex items-center gap-3">
           <div className="flex bg-white rounded-xl border border-gray-200 p-1">
-            {['upcoming','past'].map(f => (
+            {['upcoming', 'past'].map(f => (
               <button key={f} onClick={() => setFilter(f)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-all ${filter === f ? 'bg-ink-800 text-white' : 'text-gray-500 hover:text-gray-700'}`}>
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-all ${
+                  filter === f ? 'bg-ink-800 text-white' : 'text-gray-500 hover:text-gray-700'
+                }`}>
                 {f}
               </button>
             ))}
           </div>
-          <button onClick={() => setScheduleOpen(true)} className="btn-primary">+ Schedule Interview</button>
+          <button onClick={() => setScheduleOpen(true)} className="btn-primary">
+            + Schedule Interview
+          </button>
         </div>
       </div>
 
       {filtered.length === 0 ? (
-        <EmptyState icon={CalendarIcon} title={`No ${filter} interviews`} description="Schedule interviews with shortlisted candidates" action={<button onClick={() => setScheduleOpen(true)} className="btn-primary">Schedule Now</button>} />
+        <EmptyState icon={CalendarIcon} title={`No ${filter} interviews`}
+          description="Schedule interviews with shortlisted candidates"
+          action={
+            <button onClick={() => setScheduleOpen(true)} className="btn-primary">
+              Schedule Now
+            </button>
+          }
+        />
       ) : (
         <div className="space-y-4">
           {filtered.map(iv => (
@@ -262,18 +448,24 @@ export default function CompanyInterviews() {
                     <StatusBadge status={iv.status} />
                   </div>
                   <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-500">
-                    <span>📅 {dayjs(iv.scheduledAt).format('DD MMM YYYY, h:mm A')}</span>
+                    {/* Display time in IST explicitly */}
+                    <span>📅 {fmtIST(iv.scheduledAt)}</span>
                     <span>⏱ {iv.duration} min</span>
                     <span className="capitalize">📡 {iv.format}</span>
                     <span>Round {iv.round}</span>
                   </div>
-                  {iv.meetingUrl && iv.status === 'scheduled' && (
-                    <a href={iv.meetingUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 mt-2 text-sm text-blue-600 hover:underline">
-                      🔗 Join Meeting Room
+                  {iv.meetingUrl && iv.status !== 'cancelled' && (
+                    <a href={iv.meetingUrl} target="_blank" rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 mt-2 text-sm text-blue-600 hover:underline">
+                      {getMeetingIcon(iv.meetingUrl)} Join Meeting Room
                     </a>
                   )}
                   {iv.feedback?.result && iv.feedback.result !== 'pending' && (
-                    <div className={`mt-3 px-3 py-2 rounded-lg text-sm inline-flex items-center gap-2 ${iv.feedback.result === 'pass' ? 'bg-green-50 text-green-700' : iv.feedback.result === 'fail' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700'}`}>
+                    <div className={`mt-3 px-3 py-2 rounded-lg text-sm inline-flex items-center gap-2 ${
+                      iv.feedback.result === 'pass' ? 'bg-green-50 text-green-700'
+                      : iv.feedback.result === 'fail' ? 'bg-red-50 text-red-700'
+                      : 'bg-amber-50 text-amber-700'
+                    }`}>
                       Result: <strong className="capitalize">{iv.feedback.result}</strong>
                       {iv.feedback.overallRating && <span>· ⭐ {iv.feedback.overallRating}/5</span>}
                     </div>
@@ -283,12 +475,19 @@ export default function CompanyInterviews() {
               <div className="flex gap-2 mt-4 pt-3 border-t border-gray-50">
                 {iv.status === 'scheduled' && (
                   <>
-                    <button onClick={() => setFeedbackFor(iv)} className="btn-primary text-sm py-1.5">Submit Feedback</button>
-                    <button onClick={() => handleCancel(iv._id)} className="btn-ghost text-sm py-1.5 text-red-500 hover:bg-red-50">Cancel</button>
+                    <button onClick={() => setFeedbackFor(iv)} className="btn-primary text-sm py-1.5">
+                      Submit Feedback
+                    </button>
+                    <button onClick={() => handleCancel(iv._id)}
+                      className="btn-ghost text-sm py-1.5 text-red-500 hover:bg-red-50">
+                      Cancel
+                    </button>
                   </>
                 )}
                 {iv.status === 'completed' && !iv.feedback?.result && (
-                  <button onClick={() => setFeedbackFor(iv)} className="btn-secondary text-sm py-1.5">Add Feedback</button>
+                  <button onClick={() => setFeedbackFor(iv)} className="btn-secondary text-sm py-1.5">
+                    Add Feedback
+                  </button>
                 )}
               </div>
             </div>
@@ -296,8 +495,16 @@ export default function CompanyInterviews() {
         </div>
       )}
 
-      <ScheduleModal open={scheduleOpen} onClose={() => setScheduleOpen(false)} onScheduled={fetchInterviews} />
-      <FeedbackModal interview={feedbackFor} onClose={() => setFeedbackFor(null)} onSaved={fetchInterviews} />
+      <ScheduleModal
+        open={scheduleOpen}
+        onClose={() => setScheduleOpen(false)}
+        onScheduled={fetchInterviews}
+      />
+      <FeedbackModal
+        interview={feedbackFor}
+        onClose={() => setFeedbackFor(null)}
+        onSaved={fetchInterviews}
+      />
     </div>
   )
 }
