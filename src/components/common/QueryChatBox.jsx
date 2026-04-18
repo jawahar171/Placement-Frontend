@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
+import api from '../../utils/axios'
 
 // ── Icons (inline SVG to avoid extra imports) ────────────────────────────────
 const IconChat = () => (
@@ -145,19 +146,11 @@ export default function QueryChatBox() {
     setLoading(true)
 
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          system: buildSystemPrompt(user),
-          messages: historyRef.current,
-        }),
+      const { data } = await api.post('/chat', {
+        messages:     historyRef.current,
+        systemPrompt: buildSystemPrompt(user),
       })
-
-      const data = await res.json()
-      const reply = data.content?.[0]?.text || "Sorry, I couldn't get a response. Please try again."
+      const reply = data.reply || "Sorry, I couldn't get a response. Please try again."
 
       historyRef.current = [...historyRef.current, { role: 'assistant', content: reply }]
       setMessages(prev => [...prev, { role: 'assistant', content: reply, id: Date.now() }])
