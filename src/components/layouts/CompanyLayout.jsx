@@ -14,7 +14,7 @@ const companyLinks = [
   { to: '/company/applications', label: 'Applications',    icon: DocumentTextIcon },
   { to: '/company/interviews',   label: 'Interviews',      icon: CalendarIcon },
   { to: '/company/profile',      label: 'Company Profile', icon: BuildingOffice2Icon },
-  { to: '/company/queries',      label: 'Support Queries', icon: ChatBubbleLeftRightIcon },
+  { to: '/company/queries',      label: 'Queries', icon: ChatBubbleLeftRightIcon },
 ]
 
 export default function CompanyLayout() {

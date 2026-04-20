@@ -14,7 +14,7 @@ const studentLinks = [
   { to: '/student/interviews',   label: 'Interviews',       icon: CalendarIcon, badge: 'notifications' },
   { to: '/student/drives',       label: 'Placement Drives', icon: BuildingOfficeIcon },
   { to: '/student/profile',      label: 'My Profile',       icon: UserIcon },
-  { to: '/student/queries',      label: 'Support Queries',  icon: ChatBubbleLeftRightIcon },
+  { to: '/student/queries',      label: 'Queries',  icon: ChatBubbleLeftRightIcon },
 ]
 
 export default function StudentLayout() {
