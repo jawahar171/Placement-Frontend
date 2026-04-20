@@ -14,7 +14,7 @@ const adminLinks = [
   { to: '/admin/drives',     label: 'Placement Drives', icon: RocketLaunchIcon },
   { to: '/admin/interviews', label: 'Interviews',       icon: CalendarDaysIcon },
   { to: '/admin/reports',    label: 'Reports',          icon: ChartBarIcon },
-  { to: '/admin/queries',    label: 'Support Queries',  icon: ChatBubbleLeftRightIcon },
+  { to: '/admin/queries',    label: 'Queries',  icon: ChatBubbleLeftRightIcon },
 ]
 
 export default function AdminLayout() {
