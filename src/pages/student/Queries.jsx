@@ -265,7 +265,7 @@ export default function QueryPortal() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="page-title">Support Queries</h1>
+          <h1 className="page-title">Queries</h1>
           <p className="text-sm text-gray-500 mt-1">Raise and track your support tickets</p>
         </div>
         <button onClick={() => setRaiseOpen(true)} className="btn-primary flex items-center gap-2">
