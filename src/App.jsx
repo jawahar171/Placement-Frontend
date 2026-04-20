@@ -15,6 +15,7 @@ import StudentApplications from './pages/student/Applications'
 import StudentInterviews   from './pages/student/Interviews'
 import StudentProfile      from './pages/student/Profile'
 import StudentDrives       from './pages/student/Drives'
+import StudentQueries      from './pages/student/Queries'
 
 // Company pages
 import CompanyLayout       from './components/layouts/CompanyLayout'
@@ -24,6 +25,7 @@ import CompanyJobs         from './pages/company/Jobs'
 import CompanyApplications from './pages/company/Applications'
 import CompanyInterviews   from './pages/company/Interviews'
 import CompanyProfile      from './pages/company/Profile'
+import CompanyQueries      from './pages/company/Queries'
 
 // Admin pages
 import AdminLayout      from './components/layouts/AdminLayout'
@@ -33,6 +35,7 @@ import AdminCompanies   from './pages/admin/Companies'
 import AdminDrives      from './pages/admin/Drives'
 import AdminReports     from './pages/admin/Reports'
 import AdminInterviews  from './pages/admin/Interviews'
+import AdminQueries     from './pages/admin/Queries'
 
 // ── Global loading spinner ──────────────────────────────────────────────────
 function FullPageSpinner() {
@@ -87,6 +90,7 @@ function AppRoutes() {
         <Route path="interviews"  element={<StudentInterviews />} />
         <Route path="drives"      element={<StudentDrives />} />
         <Route path="profile"     element={<StudentProfile />} />
+        <Route path="queries"     element={<StudentQueries />} />
       </Route>
 
       {/* Company */}
@@ -100,6 +104,7 @@ function AppRoutes() {
         <Route path="applications" element={<CompanyApplications />} />
         <Route path="interviews"   element={<CompanyInterviews />} />
         <Route path="profile"      element={<CompanyProfile />} />
+        <Route path="queries"      element={<CompanyQueries />} />
       </Route>
 
       {/* Admin */}
@@ -113,6 +118,7 @@ function AppRoutes() {
         <Route path="drives"      element={<AdminDrives />} />
         <Route path="interviews"  element={<AdminInterviews />} />
         <Route path="reports"     element={<AdminReports />} />
+        <Route path="queries"     element={<AdminQueries />} />
       </Route>
 
       {/* Root redirect — safe because loading=false here */}

@@ -3,7 +3,8 @@ import Sidebar from '../common/Sidebar'
 import QueryChatBox from '../common/QueryChatBox'
 import {
   HomeIcon, PlusCircleIcon, BriefcaseIcon,
-  DocumentTextIcon, CalendarIcon, BuildingOffice2Icon
+  DocumentTextIcon, CalendarIcon, BuildingOffice2Icon,
+  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline'
 
 const companyLinks = [
@@ -13,6 +14,7 @@ const companyLinks = [
   { to: '/company/applications', label: 'Applications',    icon: DocumentTextIcon },
   { to: '/company/interviews',   label: 'Interviews',      icon: CalendarIcon },
   { to: '/company/profile',      label: 'Company Profile', icon: BuildingOffice2Icon },
+  { to: '/company/queries',      label: 'Support Queries', icon: ChatBubbleLeftRightIcon },
 ]
 
 export default function CompanyLayout() {

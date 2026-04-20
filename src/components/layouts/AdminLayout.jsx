@@ -3,7 +3,8 @@ import Sidebar from '../common/Sidebar'
 import QueryChatBox from '../common/QueryChatBox'
 import {
   HomeIcon, AcademicCapIcon, BuildingOffice2Icon,
-  CalendarDaysIcon, ChartBarIcon, RocketLaunchIcon
+  CalendarDaysIcon, ChartBarIcon, RocketLaunchIcon,
+  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline'
 
 const adminLinks = [
@@ -13,6 +14,7 @@ const adminLinks = [
   { to: '/admin/drives',     label: 'Placement Drives', icon: RocketLaunchIcon },
   { to: '/admin/interviews', label: 'Interviews',       icon: CalendarDaysIcon },
   { to: '/admin/reports',    label: 'Reports',          icon: ChartBarIcon },
+  { to: '/admin/queries',    label: 'Support Queries',  icon: ChatBubbleLeftRightIcon },
 ]
 
 export default function AdminLayout() {

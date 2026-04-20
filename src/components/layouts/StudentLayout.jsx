@@ -3,7 +3,8 @@ import Sidebar from '../common/Sidebar'
 import QueryChatBox from '../common/QueryChatBox'
 import {
   HomeIcon, BriefcaseIcon, DocumentTextIcon,
-  CalendarIcon, UserIcon, BuildingOfficeIcon
+  CalendarIcon, UserIcon, BuildingOfficeIcon,
+  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline'
 
 const studentLinks = [
@@ -13,6 +14,7 @@ const studentLinks = [
   { to: '/student/interviews',   label: 'Interviews',       icon: CalendarIcon, badge: 'notifications' },
   { to: '/student/drives',       label: 'Placement Drives', icon: BuildingOfficeIcon },
   { to: '/student/profile',      label: 'My Profile',       icon: UserIcon },
+  { to: '/student/queries',      label: 'Support Queries',  icon: ChatBubbleLeftRightIcon },
 ]
 
 export default function StudentLayout() {
